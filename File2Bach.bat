@@ -1,20 +1,21 @@
-@set @v=3 /* AveYo: Efficient file or folder to .bat converter via makecab compression and optimized res85 ascii encoder 
-@echo off &title File2Bach [%1] &if not ".%1"=="." setlocal &goto :Encode
-echo.&echo FILE2BACH: No input file or folder to encode! use 'Send to' context menu ...
+@set @v=3.0 /*&echo off &title File2Bach %1
+set "TOOL=FILE2BACH v%@v:~0,-3%:" || AveYo: Efficient file / folder to .bat converter with compression and optimized res85 encoder 
+if not ".%1"=="." goto :Encode
+echo %TOOL% No input file or folder to encode! use 'Send to' context menu ...
 copy /y "%~f0" "%APPDATA%\Microsoft\Windows\SendTo\File2Bach.bat" >nul 2>nul &goto :End
 :Encode
-call :MakeCab "%~f1" &if not exist "%~dpn1.cab" echo.&echo FILE2BACH: makecab %~nx1 failed, try again ... &goto :End 
+call :MakeCab "%~f1" &if not exist "%~dpn1.cab" echo %TOOL% makecab %~nx1 failed, try again ... &goto :End 
 for %%# in ("%~dpn1.cab") do set "fsize=%%~z#" &set "finput=%%~dpn#"
-if 1%fsize% GTR 110485760 echo.&echo FILE2BACH: Input %fname% is larger than 10MB, what are you trying to do?! &goto :End
-::rem comment above line to remove 10MB file limit 
+if 1%fsize% GTR 220971520 echo %TOOL% Input %fname% is larger than 20MB, what are you trying to do?! &goto :End
+::rem comment above line to remove 20MB file limit 
 cscript.exe //nologo //e:JScript "%~f0" "%finput: =_RSPACE_%.cab"
-if exist "%finput%.cab.bat" del /f /q "%finput%.cab" >nul 2>nul &echo.&echo DONE!
+if exist "%finput%.cab.bat" del /f /q "%finput%.cab"
 :End
-ping -n 6 localhost >nul &title %comspec% &endlocal &exit/b
+echo. &pause &title %comspec% &exit/b
 :MakeCab %1:[file or directory]
+echo %TOOL% makecab %~nx1 ... &echo.
 pushd %~dp1 &set "InputFile=yes" &for /f "tokens=1 delims=r-" %%# in ("%~a1") do if /i ".%%#"==".d" set "InputFile=" 
 if defined InputFile makecab.exe /D CompressionType=LZX /D CompressionLevel=7 /D CompressionMemory=21 "%~nx1" "%~n1.cab" &exit/b
-::dir /a:-D/b/s "%~1"
 set ddf="%temp%\ddf"
  >%ddf% echo/.New Cabinet
 >>%ddf% echo/.set Cabinet=ON
@@ -46,7 +47,7 @@ makecab.exe /F %ddf% /D DiskDirectory1="" /D CabinetNameTemplate=%~nx1.cab &endl
 :res85_encoder */
 //read
 arg0=WScript.Arguments(0), fn=arg0.replace(/_RSPACE_/g,' '), name=fn.split('\\').pop().split('/').pop(), exp=fn.slice(-1);
-WScript.Echo('FILE2BACH: encoding '+fn+' ...');
+WScript.Echo('FILE2BACH v'+@v+': res85 encoding '+fn+' ...');
 xe=WSH.CreateObject('Microsoft.XMLDOM').createElement('bh');rs=ws=WSH.CreateObject('ADODB.Stream');
 rs.Mode=3;rs.Type=1;rs.Open();rs.LoadFromFile(fn);len=rs.Size;xe.dataType='bin.hex';xe.nodeTypedValue = rs.Read();rs.Close();
 //encode
@@ -57,10 +58,11 @@ for(var l=a.length;l--;){var n=parseInt(a[l],16);a[l]='';for(j=5;j--;){a[l]=r85[
 var res85enc = pad>0? a.join('').slice(0,-pad):a.join('');
 //generate res85_decoder
 ws.Mode=3;ws.Type=2;ws.Charset='Windows-1252';ws.Open();
-ws.WriteText('@set @v=3 /* File2Bach\n@echo off &set "res='+name+'"\n');
+ws.WriteText('@set @v='+@v+' /*&echo off &title File2Bach\nset "res='+name+'"\n');
 ws.WriteText('pushd %~dp0 &cscript.exe //nologo //e:JScript "%~f0" "%res%"\n');
-ws.WriteText('expand.exe -R "%res%" -F:* . >nul 2>nul &del /f /q "%res%" &exit/b\n');
-ws.WriteText(':res85_decoder */\nvar fn=WSH.Arguments(0); WSH.Echo("FILE2BACH: decoding "+fn+" ..."); var res="\\\n');
+ws.WriteText('echo. &expand.exe -R "%res%" -F:* . &del /f /q "%res%"\n');
+ws.WriteText('echo. &pause &title %comspec% &exit/b\n:res85_decoder */\n');
+ws.WriteText('var fn=WSH.Arguments(0); WSH.Echo("FILE2BACH v"+@v+": res85 decoding "+fn+" ..."); var res="\\\n');
 var o=res85enc.match(/.{1,126}/g);for(i=0,l=o.length;i<l;i++) ws.WriteText("::"+o[i]+"\\\n");
 _dec="\".replace(\/[\\\\:\\s]\/gm,\"\"); \
 r85='0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz?.,;-_+=|{}[]()*^%$#!`~'.split('');\n\
