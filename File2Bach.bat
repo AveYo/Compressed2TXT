@@ -1,20 +1,20 @@
-@set @v=3.1 /*&echo off &set tool=FILE2BACH
+@set @v=3.2 /*&echo off &set tool=FILE2BACH
 title %~n0 v%@v:~0,-3% [%1] || AveYo: Efficient file / folder to .bat converter with compression and optimized res85 encoder
-if not ".%1"=="." goto :Encode 
+if not .%1==. goto :Encode 
 echo %TOOL%: No input file or folder to encode! use 'Send to' context menu ...
 copy /y "%~f0" "%APPDATA%\Microsoft\Windows\SendTo\FILE2BACH.bat" >nul 2>nul &goto :End
 :Encode
-call :MakeCab "%~f1" &if not exist "%~dpn1~" echo %TOOL%: makecab %~nx1 failed, try again ... &goto :End 
-for %%# in ("%~dpn1~") do set "fsize=%%~z#" &set "finput=%%~f#"
-if 1%fsize% GTR 220971520 echo %TOOL%: Input %~nx1 is larger than 20MB, what are you trying to do?! &goto :End
+pushd %~dp1 &set "InputFile=yes" &for /f "tokens=1 delims=r-" %%# in ("%~a1") do if /i ".%%#"==".d" set "InputFile=" 
+if defined InputFile ( set "cabfile=%~dpn1~" ) else set "cabfile=%~dpnx1~"
+call :MakeCab "%~f1" &if not exist "%cabfile%" echo %TOOL%: makecab '%~nx1' failed, try again ... &goto :End 
+for %%# in ("%cabfile%") do if 1%%~z# GTR 220971520 echo %TOOL%: Input '%~nx1' is larger than the 20MB size limit! &goto :End
 ::rem comment above line to remove 20MB file limit 
-cscript.exe //nologo //e:JScript "%~f0" "%finput: =_RSPACE_%"
-if exist "%finput%.bat" del /f /q "%finput%"
+cscript.exe //nologo //e:JScript "%~f0" "%cabfile: =_RSPACE_%"
+if exist "%cabfile%.bat" del /f /q "%cabfile%"
 :End
 echo. &pause &title %comspec% &exit/b
 :MakeCab %1:[file or directory]
-echo %TOOL%: makecab %~nx1 ... &echo.
-pushd %~dp1 &set "InputFile=yes" &for /f "tokens=1 delims=r-" %%# in ("%~a1") do if /i ".%%#"==".d" set "InputFile=" 
+echo %TOOL%: makecab '%~nx1' ... &echo.
 if defined InputFile makecab.exe /D CompressionType=LZX /D CompressionLevel=7 /D CompressionMemory=21 "%~nx1" "%~n1~" &exit/b
 set ddf="%temp%\ddf"
  >%ddf% echo/.New Cabinet
@@ -43,7 +43,7 @@ for /f "tokens=* delims=" %%# in ('dir /a:-D/b/s "%~1"') do (
  echo/"%%~f#"  /inf=no;>>%ddf%
  set "LastDir=!DDir!"
 )
-makecab.exe /F %ddf% /D DiskDirectory1="" /D CabinetNameTemplate=%~nx1~ &endlocal &popd &del /q /f %ddf% &echo. &exit/b
+makecab.exe /F %ddf% /D DiskDirectory1="" /D CabinetNameTemplate="%~nx1~" &endlocal &popd &del /q /f %ddf% &echo. &exit/b
 :res85_encoder */
 //read
 arg0=WSH.Arguments(0), fn=arg0.replace(/_RSPACE_/g,' '), fname=fn.split('\\').pop().split('/').pop();
