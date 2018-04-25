@@ -57,7 +57,7 @@ for(var l=a.length;l--;){var n=parseInt(a[l],16);a[l]='';for(j=5;j--;){a[l]=r85[
 var res85enc = pad>0? a.join('').slice(0,-pad):a.join('');
 //generate res85_decoder
 ws.Mode=3;ws.Type=2;ws.Charset='Windows-1252';ws.Open();
-ws.WriteText('@set @v=3 /* Attach2Text\n@echo off &set "res='+name+'"\n');
+ws.WriteText('@set @v=3 /* File2Bach\n@echo off &set "res='+name+'"\n');
 ws.WriteText('pushd %~dp0 &cscript.exe //nologo //e:JScript "%~f0" "%res%"\n');
 ws.WriteText('expand.exe -R "%res%" -F:* . >nul 2>nul &del /f /q "%res%" &exit/b\n');
 ws.WriteText(':res85_decoder */\nvar fn=WSH.Arguments(0); WSH.Echo("FILE2BACH: decoding "+fn+" ..."); var res="\\\n');
