@@ -1,8 +1,8 @@
-@set @v=3.2 /*&echo off &set tool=FILE2BACH
+@set @v=3.3 /*&echo off &set tool=FILE2BATCH
 title %~n0 v%@v:~0,-3% [%1] || AveYo: Efficient file / folder to .bat converter with compression and optimized res85 encoder
 if not .%1==. goto :Encode 
 echo %TOOL%: No input file or folder to encode! use 'Send to' context menu ...
-copy /y "%~f0" "%APPDATA%\Microsoft\Windows\SendTo\FILE2BACH.bat" >nul 2>nul &goto :End
+copy /y "%~f0" "%APPDATA%\Microsoft\Windows\SendTo\File2Batch.bat" >nul 2>nul &goto :End
 :Encode
 pushd %~dp1 &set "InputFile=yes" &for /f "tokens=1 delims=r-" %%# in ("%~a1") do if /i ".%%#"==".d" set "InputFile=" 
 if defined InputFile ( set "cabfile=%~dpn1~" ) else set "cabfile=%~dpnx1~"
@@ -47,7 +47,7 @@ makecab.exe /F %ddf% /D DiskDirectory1="" /D CabinetNameTemplate="%~nx1~" &endlo
 :res85_encoder */
 //read
 arg0=WSH.Arguments(0), fn=arg0.replace(/_RSPACE_/g,' '), fname=fn.split('\\').pop().split('/').pop();
-WScript.Echo('FILE2BACH v'+@v+': res85 encoding '+fn+' ...');
+WScript.Echo('FILE2BATCH v'+@v+': res85 encoding '+fn+' ...');
 xe=WSH.CreateObject('Microsoft.XMLDOM').createElement('bh');rs=ws=WSH.CreateObject('ADODB.Stream');
 rs.Mode=3;rs.Type=1;rs.Open();rs.LoadFromFile(fn);len=rs.Size;xe.dataType='bin.hex';xe.nodeTypedValue = rs.Read();rs.Close();
 //encode
@@ -58,11 +58,11 @@ for(var l=a.length;l--;){var n=parseInt(a[l],16);a[l]='';for(j=5;j--;){a[l]=r85[
 var res85enc = pad>0? a.join('').slice(0,-pad):a.join('');
 //generate res85_decoder
 ws.Mode=3;ws.Type=2;ws.Charset='Windows-1252';ws.Open();
-ws.WriteText('@set @v='+@v+' /*&echo off &set tool=FILE2BACH\ntitle %tool% v%@v:~0,-3% [%~f0]\nset "res='+fname+'"\n');
+ws.WriteText('@set @v='+@v+' /*&echo off &set tool=FILE2BATCH\ntitle %tool% v%@v:~0,-3% [%~f0]\nset "res='+fname+'"\n');
 ws.WriteText('pushd %~dp0 &cscript.exe //nologo //e:JScript "%~f0" "%res%"\n');
 ws.WriteText('echo. &expand.exe -R "%res%" -F:* . &del /f /q "%res%"\n');
 ws.WriteText('echo. &pause &title %comspec% &exit/b\n:res85_decoder */\n');
-ws.WriteText('var fn=WSH.Arguments(0); WSH.Echo("FILE2BACH v"+@v+": res85 decoding "+fn+" ..."); var res="\\\n');
+ws.WriteText('var fn=WSH.Arguments(0); WSH.Echo("FILE2BATCH v"+@v+": res85 decoding "+fn+" ..."); var res="\\\n');
 var o=res85enc.match(/.{1,126}/g);for(i=0,l=o.length;i<l;i++) ws.WriteText("::"+o[i]+"\\\n");
 _dec="\".replace(\/[\\\\:\\s]\/gm,\"\"); \
 r85='0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz?.,;-_+=|{}[]()*^%$#!`~'.split('');\n\
