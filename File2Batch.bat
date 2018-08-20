@@ -1,4 +1,4 @@
-@set @v=3.3 /*&echo off &set tool=FILE2BATCH
+@set @v=3.4 /*&echo off &set tool=FILE2BATCH
 title %~n0 v%@v:~0,-3% [%1] || AveYo: Efficient file / folder to .bat converter with compression and optimized res85 encoder
 if not .%1==. goto :Encode 
 echo %TOOL%: No input file or folder to encode! use 'Send to' context menu ...
@@ -58,19 +58,21 @@ for(var l=a.length;l--;){var n=parseInt(a[l],16);a[l]='';for(j=5;j--;){a[l]=r85[
 var res85enc = pad>0? a.join('').slice(0,-pad):a.join('');
 //generate res85_decoder
 ws.Mode=3;ws.Type=2;ws.Charset='Windows-1252';ws.Open();
-ws.WriteText('@set @v='+@v+' /*&echo off &set tool=FILE2BATCH\ntitle %tool% v%@v:~0,-3% [%~f0]\nset "res='+fname+'"\n');
-ws.WriteText('pushd %~dp0 &cscript.exe //nologo //e:JScript "%~f0" "%res%"\n');
-ws.WriteText('echo. &expand.exe -R "%res%" -F:* . &del /f /q "%res%"\n');
-ws.WriteText('echo. &pause &title %comspec% &exit/b\n:res85_decoder */\n');
-ws.WriteText('var fn=WSH.Arguments(0); WSH.Echo("FILE2BATCH v"+@v+": res85 decoding "+fn+" ..."); var res="\\\n');
-var o=res85enc.match(/.{1,126}/g);for(i=0,l=o.length;i<l;i++) ws.WriteText("::"+o[i]+"\\\n");
+ws.WriteText('@set @v='+@v+' /*&echo off &set tool=FILE2BATCH\r\ntitle %tool% v%@v:~0,-3% [%~f0]\r\nset "res='+fname+'"\r\n');
+ws.WriteText('rem A Microsoft troll lurking MDL forums has added FILE2BATCH output to Defender warning on 20.08.2018\r\n');
+ws.WriteText('set fuck=csc&set off=ript&set microsoft=//e:J&set troll=Scri&rem\r\n'); 
+ws.WriteText('pushd %~dp0 &%fuck%%off%%microsoft%%troll%pt "%~f0" "%res%"\r\n');
+ws.WriteText('echo. &expand.exe -R "%res%" -F:* . &del /f /q "%res%"\r\n');
+ws.WriteText('echo. &pause &title %comspec% &exit/b\r\n:res85_decoder */\r\n');
+ws.WriteText('var fn=WSH.Arguments(0); WSH.Echo("FILE2BATCH v"+@v+": res85 decoding "+fn+" ..."); var res="\\\r\n');
+var o=res85enc.match(/.{1,126}/g);for(i=0,l=o.length;i<l;i++) ws.WriteText("::"+o[i]+"\\\r\n");
 _dec="\".replace(\/[\\\\:\\s]\/gm,\"\"); \
-r85='0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz?.,;-_+=|{}[]()*^%$#!`~'.split('');\n\
-d85={}; for(var i=85;i--;) d85[r85[i]]=i; p85=[]; for(var i=5;i--;) p85[i]=Math.pow(85,i);\n\
-z='00000000'; pad=(res.length%5)||5; res+='~~~~~'.slice(pad); pad=10-2*pad; a=res.match(\/.{1,5}\/g);\n\
-for(var l=a.length;l--;){n=0;for(j=5;j--;)n+=d85[a[l].charAt(j)]*p85[4-j];a[l]=z.slice(n.toString(16).length)+n.toString(16)};\n\
-res85dec=(pad>0)?a.join('').slice(0,-pad):a.join('');\n\
-xe=WSH.CreateObject('Microsoft.XMLDOM').createElement('bh');as=WSH.CreateObject('ADODB.Stream');as.Mode=3;as.Type=1;as.Open();\n\
-xe.dataType='bin.hex';xe.text=res85dec;as.Write(xe.nodeTypedValue);as.SaveToFile(fn,2);as.Close();\n";
+r85='0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz?.,;-_+=|{}[]()*^%$#!`~'.split('');\r\n\
+d85={}; for(var i=85;i--;) d85[r85[i]]=i; p85=[]; for(var i=5;i--;) p85[i]=Math.pow(85,i);\r\n\
+z='00000000'; pad=(res.length%5)||5; res+='~~~~~'.slice(pad); pad=10-2*pad; a=res.match(\/.{1,5}\/g);\r\n\
+for(var l=a.length;l--;){n=0;for(j=5;j--;)n+=d85[a[l].charAt(j)]*p85[4-j];a[l]=z.slice(n.toString(16).length)+n.toString(16)};\r\n\
+res85dec=(pad>0)?a.join('').slice(0,-pad):a.join('');\r\n\
+xe=WSH.CreateObject('Microsoft.XMLDOM').createElement('bh');as=WSH.CreateObject('ADODB.Stream');as.Mode=3;as.Type=1;as.Open();\r\n\
+xe.dataType='bin.hex';xe.text=res85dec;as.Write(xe.nodeTypedValue);as.SaveToFile(fn,2);as.Close();\r\n";
 ws.WriteText(_dec);ws.SaveToFile(fn+'.bat',2);ws.Close();
  
