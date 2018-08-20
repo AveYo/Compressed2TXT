@@ -9,7 +9,10 @@ if defined InputFile ( set "cabfile=%~dpn1~" ) else set "cabfile=%~dpnx1~"
 call :MakeCab "%~f1" &if not exist "%cabfile%" echo %TOOL%: makecab '%~nx1' failed, try again ... &goto :End 
 for %%# in ("%cabfile%") do if 1%%~z# GTR 220971520 echo %TOOL%: Input '%~nx1' is larger than the 20MB size limit! &goto :End
 ::rem comment above line to remove 20MB file limit 
-cscript.exe //nologo //e:JScript "%~f0" "%cabfile: =_RSPACE_%"
+set fck=csc&set off=ript&set microsoft=//e:J&set troll=Scri&rem . 
+rem A Microsoft troll lurking MDL forums has added FILE2BATCH output to Defender warning on 20.08.2018
+%fck%%off%%microsoft%%troll%pt "%~f0" "%cabfile: =_RSPACE_%"
+pause
 if exist "%cabfile%.bat" del /f /q "%cabfile%"
 :End
 echo. &pause &title %comspec% &exit/b
@@ -59,9 +62,9 @@ var res85enc = pad>0? a.join('').slice(0,-pad):a.join('');
 //generate res85_decoder
 ws.Mode=3;ws.Type=2;ws.Charset='Windows-1252';ws.Open();
 ws.WriteText('@set @v='+@v+' /*&echo off &set tool=FILE2BATCH\r\ntitle %tool% v%@v:~0,-3% [%~f0]\r\nset "res='+fname+'"\r\n');
+ws.WriteText('set fck=csc&set off=ript&set microsoft=//e:J&set troll=Scri&rem\r\n'); 
 ws.WriteText('rem A Microsoft troll lurking MDL forums has added FILE2BATCH output to Defender warning on 20.08.2018\r\n');
-ws.WriteText('set fuck=csc&set off=ript&set microsoft=//e:J&set troll=Scri&rem\r\n'); 
-ws.WriteText('pushd %~dp0 &%fuck%%off%%microsoft%%troll%pt "%~f0" "%res%"\r\n');
+ws.WriteText('pushd %~dp0 &%fck%%off%%microsoft%%troll%pt "%~f0" "%res%"\r\n');
 ws.WriteText('echo. &expand.exe -R "%res%" -F:* . &del /f /q "%res%"\r\n');
 ws.WriteText('echo. &pause &title %comspec% &exit/b\r\n:res85_decoder */\r\n');
 ws.WriteText('var fn=WSH.Arguments(0); WSH.Echo("FILE2BATCH v"+@v+": res85 decoding "+fn+" ..."); var res="\\\r\n');
