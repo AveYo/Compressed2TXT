@@ -4,6 +4,11 @@ Efficient file or folder to .bat converter via makecab compression and optimized
 ## Typical usage  
 Used mostly for sharing configs / scripts / dumps / captures as plain-text on message boards that lack proper file attachments, or to safekeep, run multiple tests and sharing binaries in malware analysis tasks  
 
+## Uninstall  
+File2Batch.bat adds itself to the Send To right-click menu for convenience in usage. To remove, just run:  
+```bat
+cmd.exe /c del /f/q "%USERPROFILE%\AppData\Roaming\Microsoft\Windows\SendTo\File2Batch.bat"  
+```
 ## res85 encoder details  
 Tweaked version of [Ascii85](https://en.wikipedia.org/wiki/Ascii85) that works well with batch syntax highlighter used by pastebin and others  
 
