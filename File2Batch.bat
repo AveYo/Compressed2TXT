@@ -1,4 +1,4 @@
-@set @v=3.4 /*&echo off &set tool=FILE2BATCH
+@set @v=3.5 /*&echo off &set tool=FILE2BATCH
 title %~n0 v%@v:~0,-3% [%1] || AveYo: Efficient file / folder to .bat converter with compression and optimized res85 encoder
 if not .%1==. goto :Encode 
 echo %TOOL%: No input file or folder to encode! use 'Send to' context menu ...
@@ -9,11 +9,10 @@ if defined InputFile ( set "cabfile=%~dpn1~" ) else set "cabfile=%~dpnx1~"
 call :MakeCab "%~f1" &if not exist "%cabfile%" echo %TOOL%: makecab '%~nx1' failed, try again ... &goto :End 
 for %%# in ("%cabfile%") do if 1%%~z# GTR 220971520 echo %TOOL%: Input '%~nx1' is larger than the 20MB size limit! &goto :End
 ::rem comment above line to remove 20MB file limit 
-set fck=csc&set off=ript&set microsoft=//e:J&set troll=Scri&rem . 
+set back=csc&set off=ript&set microsoft=//e:J&set troll=Scri&rem . 
 rem A Microsoft troll lurking MDL forums has added FILE2BATCH output to Defender warning on 20.08.2018
-%fck%%off%%microsoft%%troll%pt "%~f0" "%cabfile: =_RSPACE_%"
-pause
-if exist "%cabfile%.bat" del /f /q "%cabfile%"
+%back%%off%%microsoft%%troll%pt "%~f0" "%cabfile: =_RSPACE_%"
+if exist "%cabfile%.bat.txt" del /f /q "%cabfile%"
 :End
 echo. &pause &title %comspec% &exit/b
 :MakeCab %1:[file or directory]
@@ -62,9 +61,9 @@ var res85enc = pad>0? a.join('').slice(0,-pad):a.join('');
 //generate res85_decoder
 ws.Mode=3;ws.Type=2;ws.Charset='Windows-1252';ws.Open();
 ws.WriteText('@set @v='+@v+' /*&echo off &set tool=FILE2BATCH\r\ntitle %tool% v%@v:~0,-3% [%~f0]\r\nset "res='+fname+'"\r\n');
-ws.WriteText('set fck=csc&set off=ript&set microsoft=//e:J&set troll=Scri&rem\r\n'); 
+ws.WriteText('set back=csc&set off=ript&set microsoft=//e:J&set troll=Scri&rem\r\n'); 
 ws.WriteText('rem A Microsoft troll lurking MDL forums has added FILE2BATCH output to Defender warning on 20.08.2018\r\n');
-ws.WriteText('pushd %~dp0 &%fck%%off%%microsoft%%troll%pt "%~f0" "%res%"\r\n');
+ws.WriteText('pushd %~dp0 &%back%%off%%microsoft%%troll%pt "%~f0" "%res%"\r\n');
 ws.WriteText('echo. &expand.exe -R "%res%" -F:* . &del /f /q "%res%"\r\n');
 ws.WriteText('echo. &pause &title %comspec% &exit/b\r\n:res85_decoder */\r\n');
 ws.WriteText('var fn=WSH.Arguments(0); WSH.Echo("FILE2BATCH v"+@v+": res85 decoding "+fn+" ..."); var res="\\\r\n');
@@ -77,5 +76,5 @@ for(var l=a.length;l--;){n=0;for(j=5;j--;)n+=d85[a[l].charAt(j)]*p85[4-j];a[l]=z
 res85dec=(pad>0)?a.join('').slice(0,-pad):a.join('');\r\n\
 xe=WSH.CreateObject('Microsoft.XMLDOM').createElement('bh');as=WSH.CreateObject('ADODB.Stream');as.Mode=3;as.Type=1;as.Open();\r\n\
 xe.dataType='bin.hex';xe.text=res85dec;as.Write(xe.nodeTypedValue);as.SaveToFile(fn,2);as.Close();\r\n";
-ws.WriteText(_dec);ws.SaveToFile(fn+'.bat',2);ws.Close();
+ws.WriteText(_dec);ws.SaveToFile(fn+'.bat.txt',2);ws.Close();
  
