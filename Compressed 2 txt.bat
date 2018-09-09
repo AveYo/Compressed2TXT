@@ -1,5 +1,5 @@
 <# : Compressed 2 txt : Efficient file / folder encoder by AveYo - output can be renamed to .bat or .ps1 to decode
-@echo off &title %~n0 v4 [%1]
+@echo off &title %~n0 v4.0 [%1]
 if not .%1==. goto :Encode
 echo. &echo  No input file or folder to encode! use 'Send to' context menu ...
 copy /y "%~f0" "%APPDATA%\Microsoft\Windows\SendTo\Compressed 2 txt.bat" >nul 2>nul &goto :End
@@ -10,7 +10,7 @@ call :MakeCab "%~f1" &if not exist "%cabfile%" echo  makecab '%~nx1' failed, try
 for %%# in ("%cabfile%") do if 1%%~z# GTR 220971520 echo  Input '%~nx1' is larger than the 20MB limit! &goto :End
 ::rem comment above line to remove 20MB file limit
 type "%~f0" | powershell.exe -c -
-if exist "%cabfile%.bat.txt" del /f /q "%cabfile%"
+if exist "%cabfile%.bat" del /f /q "%cabfile%"
 timeout /t 10
 ::start "preview" notepad "%cabfile%.bat.txt"
 exit/b
@@ -105,7 +105,7 @@ $content = r85encode $bin 125 # to also limit encode output line length use: r85
 if ($content.length -lt 5){ throw "File2TXTenc failed" }
 
 echo " Generate output file with bundled r85decode ..."
-$outfile=$cabfile+'.bat.txt';
+$outfile=$cabfile+'.bat';
 $hd = @()
 $hd+='<# : Compressed 2 txt : Efficient file / folder encoder by AveYo - can rename to .bat or .ps1 to decode'
 $hd+='@powershell -NoProfile -NoLogo -Command "iex (${%~f0} | out-string)" &exit/b'
