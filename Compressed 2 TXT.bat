@@ -1,8 +1,8 @@
-<# : Compressed 2 txt : Efficient file / folder encoder by AveYo - output can be renamed to .bat or .ps1 to decode
+<# : Compressed 2 TXT : Efficient file / folder encoder by AveYo - output can be renamed to .bat or .ps1 to decode
 @echo off &title %~n0 v4.0 [%1]
 if not .%1==. goto :Encode
 echo. &echo  No input file or folder to encode! use 'Send to' context menu ...
-copy /y "%~f0" "%APPDATA%\Microsoft\Windows\SendTo\Compressed 2 txt.bat" >nul 2>nul &goto :End
+copy /y "%~f0" "%APPDATA%\Microsoft\Windows\SendTo\Compressed 2 TXT.bat" >nul 2>nul &goto :End
 :Encode
 pushd %~dp1 &set "InputFile=yes" &for /f "tokens=1 delims=r-" %%# in ("%~a1") do if /i ".%%#"==".d" set "InputFile="
 if defined InputFile ( set "cabfile=%~dpn1~" ) else set "cabfile=%~dpnx1~"
