@@ -7,7 +7,7 @@ Optional line split and prefix
 ## Typical usage  
 Used mostly for sharing configs / scripts / dumps / captures as plain-text on message boards that lack proper file attachments, or to safekeep, run multiple tests and sharing binaries in malware analysis tasks  
 
-## TIP: to prevent copy/paste line-endings issues with the script, use github's `clone or download` - `download ZIP` button  
+To prevent copy/paste line-endings issues with the script, use github's `clone or download` - `download ZIP` button  
 
 ## Uninstall  
 `Compressed 2 TXT.bat` adds itself to the Send To right-click menu for convenience in usage. To remove, just run:  
