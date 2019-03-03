@@ -1,8 +1,8 @@
 # Compressed 2 TXT (formerly File2Batch / res2batch)  
-Windows 7 support ( PowerShell 2.0 / C# 2.0 )
-Very fast encoding and decoding BAT85 class
-Multiple file(s) and folder(s) "Send to" selection
-Optional line split and prefix
+Windows 7 support ( PowerShell 2.0 / C# 2.0 )  
+Very fast encoding and decoding BAT85 class  
+Multiple file(s) and folder(s) "Send to" selection  
+Optional line split and prefix  
 
 ## Typical usage  
 Used mostly for sharing configs / scripts / dumps / captures as plain-text on message boards that lack proper file attachments, or to safekeep, run multiple tests and sharing binaries in malware analysis tasks  
@@ -15,12 +15,12 @@ cmd.exe /c del /f/q "%USERPROFILE%\AppData\Roaming\Microsoft\Windows\SendTo\Comp
 ## bat85 encoder/decoder details  
 Tweaked version of [Ascii85](https://en.wikipedia.org/wiki/Ascii85) that works well with batch syntax highlighter used by pastebin and others  
 
+Dictionary:  
 ```
-Dictionary:
 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!#&()*+,-./;=?@[]^_{|}~
 ```
+Encoded example (with batch parameters `set/a USE_LINES=1` and `set/a USE_PREFIX=1`):  
 ```bat
-Encoded example (with batch parameters `set/a USE_LINES=1` and `set/a USE_PREFIX=1`):
 ::O/bZg00000UnT|s00000EC2ui000000|5a51][s6G/aU]tpNZ4B?+2zc?n-a00000001aWshJ=ETy&[5Y/#/wbY+?}TuezrMNUISE^HHj03aCx0C[la0000eO^7+)
 ::09;r&Z+|g1Q,?ovZCqq/bYUPeAYx]7VO*cnZDm|yX?MG1X?K-)TykY|Z,^8GWn,t_aA|C1axP^fWdHz*1pt{D0ssI2,G#tyAOKu-Z,OdKTvK#qVQpMfZ,^8GWkzXi
 ::ZEay|WpZ3-VQpnxVrgz(W[)6@b9r.gWo=*_bYy97E[W*M008O*0GXi)0002jOt(Xl09;r&Z+|g1Q,?ovZCq1tb#h~6MrmwqZDDI=a&IL)ZDm|yX?MF}X=QRSE[W*M
