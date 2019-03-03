@@ -7,7 +7,7 @@ Optional line split and prefix
 ## Typical usage  
 Used mostly for sharing configs / scripts / dumps / captures as plain-text on message boards that lack proper file attachments, or to safekeep, run multiple tests and sharing binaries in malware analysis tasks  
 
-To prevent copy/paste line-endings issues with the script, use github's `clone or download` - `download ZIP` button  
+To prevent copy/paste line-endings issues with the script, use github's [clone or download - download ZIP](https://github.com/AveYo/Compressed2TXT/archive/master.zip) button  
 
 ## Uninstall  
 `Compressed 2 TXT.bat` adds itself to the Send To right-click menu for convenience in usage. To remove, just run:  
@@ -22,6 +22,8 @@ Dictionary:
 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!#&()*+,-./;=?@[]^_{|}~
 ```
 Encoded example of this release (with batch parameters `set/a USE_LINES=1` and `set/a USE_PREFIX=1`):  
+<details>
+  <summary>Click to expand</summary><p>
 ```bat
 @echo off & pushd %~dp0
 powershell -noprofile -c "$f=[io.file]::ReadAllText('%~f0') -split ':bat2file\:.*';iex ($f[1]);X 1;X 2;X 3;X 4;"
@@ -106,6 +108,8 @@ Add-Type -Language CSharp -TypeDefinition @"
 ::O/bZg00000fdBvi00000EC2ui000000|5a50RR9100000O8[_?0RRIP82|tP00000003i71O[/AE[x@UVRUqIX;~JBWpe/UuvCsN02u)VfPjqvFpvQZ0000D00001
 ::0000gAarGTbUk5pbZ.p_Dj/QVY)~OgY.SA#00
 ```
+</p></details>
+
 ## Intuitive multiple files support with low overhead
 _A single decoding block that needs to be placed before the file data. By default batch script decodes all bundled files in one go, but it can be split into individual files anywhere in the script:_  
 `powershell -noprofile -c "$f=[io.file]::ReadAllText('%~f0') -split ':bat2file\:.*';iex ($f[1]);X 2;"`  
