@@ -106,6 +106,12 @@ Add-Type -Language CSharp -TypeDefinition @"
 ::O/bZg00000fdBvi00000EC2ui000000|5a50RR9100000O8[_?0RRIP82|tP00000003i71O[/AE[x@UVRUqIX;~JBWpe/UuvCsN02u)VfPjqvFpvQZ0000D00001
 ::0000gAarGTbUk5pbZ.p_Dj/QVY)~OgY.SA#00
 ```
+##Intuitive multiple files support with low overhead
+_A single decoding block that needs to be placed before the file data. By default batch script decodes all bundled files in one go, but it can be split into individual files anywhere in the script:_  
+`powershell -noprofile -c "$f=[io.file]::ReadAllText('%~f0') -split ':bat2file\:.*';iex ($f[1]);X 2;"`  
+`...`  
+`powershell -noprofile -c "$f=[io.file]::ReadAllText('%~f0') -split ':bat2file\:.*';iex ($f[1]);X 4;"`  
+_where `X 2;` calls the decoding block to extract the 2nd file data, while `X 4;` - the 4th_  
 
 PowerShell C# snippet BAT85 Encode and Decode class (bundled by generating script slightly uglified):
 ```c#
