@@ -22,8 +22,6 @@ Dictionary:
 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!#&()*+,-./;=?@[]^_{|}~
 ```
 Encoded example of this release (with batch parameters `set/a USE_LINES=1` and `set/a USE_PREFIX=1`):  
-<details>
-  <summary>Click to expand</summary><p>
 ```bat
 @echo off & pushd %~dp0
 powershell -noprofile -c "$f=[io.file]::ReadAllText('%~f0') -split ':bat2file\:.*';iex ($f[1]);X 1;X 2;X 3;X 4;"
@@ -108,7 +106,6 @@ Add-Type -Language CSharp -TypeDefinition @"
 ::O/bZg00000fdBvi00000EC2ui000000|5a50RR9100000O8[_?0RRIP82|tP00000003i71O[/AE[x@UVRUqIX;~JBWpe/UuvCsN02u)VfPjqvFpvQZ0000D00001
 ::0000gAarGTbUk5pbZ.p_Dj/QVY)~OgY.SA#00
 ```
-</p></details>
 
 ## Intuitive multiple files support with low overhead
 _A single decoding block that needs to be placed before the file data. By default batch script decodes all bundled files in one go, but it can be split into individual files anywhere in the script:_  
