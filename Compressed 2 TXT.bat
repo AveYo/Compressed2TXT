@@ -1,4 +1,4 @@
-@echo off & set "nr=" & set "id=" & title Compressed2TXT v5.0 &rem File(s)/Folder(s) "Send to" .bat ascii encoder by AveYo
+@echo off & set "nr=" & set "id=" & title Compressed2TXT v5.1 &rem File(s)/Folder(s) "Send to" .bat ascii encoder by AveYo
 set/a USE_LINES=1
 set/a USE_PREFIX=0
 if not %1.==. goto :CompressAll
@@ -57,7 +57,7 @@ makecab.exe /F %ddf% /D DiskDirectory1="" /D CabinetNameTemplate="%~nx1~" &endlo
 Add-Type -Language CSharp -TypeDefinition @"
 using System.IO; using System.Text;
 public class BAT85 {
-  private static string a85="0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!#&()*+,-./;=?@[]^_{|}~";
+  private static string a85="0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!#$&()+,-./;=?@[]^_{|}~";
   private static byte[] b85=new byte[85]; private static long n=0; private static int[] p85={52200625,614125,7225,85,1};
   private static byte[] n4b(){ return new byte[4]{(byte)(n>>24),(byte)(n>>16),(byte)(n>>8),(byte)n}; }
   private static byte[] n5b(){ byte[] k;k=new byte[5]; for(int j=0;j<5;j++){ k[4-j]=b85[(byte)(n % 85)]; n /= 85; } return k;}
@@ -95,10 +95,10 @@ powershell -noprofile -c "$f=[io.file]::ReadAllText('%~f0') -split ':bat2file\:.
 if ($count -gt 0){ for ($i=1;$i -le $count;$i++) { $EXPANDER+="X $i;" } }
 $EXPANDER += "`"`r`nexit/b`r`n`r`n"
 $EXPANDER += @'
-:bat2file: Compressed2TXT v5
+:bat2file: Compressed2TXT v5.1
 Add-Type -Language CSharp -TypeDefinition @"
  using System.IO; public class BAT85{ public static void Decode(string tmp, string s) { MemoryStream ms=new MemoryStream(); n=0;
- byte[] b85=new byte[255]; string a85="0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!#&()*+,-./;=?@[]^_{|}~";
+ byte[] b85=new byte[255]; string a85="0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!#$&()+,-./;=?@[]^_{|}~";
  int[] p85={52200625,614125,7225,85,1}; for(byte i=0;i<85;i++){b85[(byte)a85[i]]=i;} bool k=false;int p=0; foreach(char c in s){
  switch(c){ case'\0':case'\n':case'\r':case'\b':case'\t':case'\xA0':case' ':case':': k=false;break; default: k=true;break; }
  if(k){ n+= b85[(byte)c] * p85[p++]; if(p == 5){ ms.Write(n4b(), 0, 4); n=0; p=0; } } }         if(p>0){ for(int i=0;i<5-p;i++){
