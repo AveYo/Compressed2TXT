@@ -1,4 +1,4 @@
-@echo off & set "nr=" & set "id=" & title Compressed2TXT v5.1 &rem File(s)/Folder(s) "Send to" .bat ascii encoder by AveYo
+@echo off & set "nr=" & set "id=" & title Compressed2TXT v5.2 &rem File(s)/Folder(s) "Send to" .bat ascii encoder by AveYo
 set/a USE_LINES=1
 set/a USE_PREFIX=0
 if not %1.==. goto :CompressAll
@@ -12,9 +12,9 @@ for %%# in (%*) do set/a nr+=1 & call :CompressOne "%%~#"
 goto :End
 :CompressOne
 pushd %~dp1 & set "IsFile=yes" & for /f "tokens=1 delims=r-" %%# in ("%~a1") do if /i ".%%#"==".d" set "IsFile="
-if defined IsFile ( set "cabfile=%~n1~" ) else set "cabfile=%~nx1~"
-call :MakeCab "%~f1" & if not exist "%cabfile%" echo MAKECAB '%~nx1' failed, try again ... &goto :End
-if not defined id call set "id=%~n1~"
+set "cabfile=%~nx1~"
+call :MakeCab "%~f1" & if not exist "%cabfile%" echo MAKECAB '%~f1' failed, try again ... &goto :End
+if not defined id call set "id=%~nx1~"
 if not defined count set/a nr=1 & set/a count=1
 set "PSARGS=$nr=%nr%;$count=%count%;$id='%id%';$fn='%cabfile%'; $uselines=%USE_LINES%; $useprefix=%USE_PREFIX%;"
 powershell -noprofile -c "$f=[io.file]::ReadAllText('%~f0') -split ':CompressPS\:.*'; %PSARGS%; iex ($f[1]);"
@@ -23,7 +23,7 @@ del /f /q "%cabfile%" & exit/b
 echo. & pause & color 07 & title %comspec% & exit/b
 :MakeCab [file or directory]
 echo MAKECAB '%~nx1' ... &echo.
-if defined IsFile makecab.exe /D CompressionType=LZX /D CompressionLevel=7 /D CompressionMemory=21 "%~nx1" "%~n1~" &exit/b
+if defined IsFile makecab.exe /D CompressionType=LZX /D CompressionLevel=7 /D CompressionMemory=21 "%~nx1" "%~nx1~" &exit/b
 set ddf="%temp%\ddf"
  >%ddf% echo/.New Cabinet
 >>%ddf% echo/.set Cabinet=ON
@@ -95,7 +95,7 @@ powershell -noprofile -c "$f=[io.file]::ReadAllText('%~f0') -split ':bat2file\:.
 if ($count -gt 0){ for ($i=1;$i -le $count;$i++) { $EXPANDER+="X $i;" } }
 $EXPANDER += "`"`r`nexit/b`r`n`r`n"
 $EXPANDER += @'
-:bat2file: Compressed2TXT v5.1
+:bat2file: Compressed2TXT v5.2
 Add-Type -Language CSharp -TypeDefinition @"
  using System.IO; public class BAT85{ public static void Decode(string tmp, string s) { MemoryStream ms=new MemoryStream(); n=0;
  byte[] b85=new byte[255]; string a85="0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!#$&()+,-./;=?@[]^_{|}~";
