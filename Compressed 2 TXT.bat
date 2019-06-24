@@ -1,6 +1,6 @@
-@echo off & set "nr=" & set "id=" & title Compressed2TXT v5.2 &rem File(s)/Folder(s) "Send to" .bat ascii encoder by AveYo
+@echo off & set "nr=" & set "id=" & title Compressed2TXT v5.3 &rem File(s)/Folder(s) "Send to" .bat ascii encoder by AveYo
 set/a USE_LINES=1
-set/a USE_PREFIX=0
+set/a USE_PREFIX=1
 if not %1.==. goto :CompressAll
 color 0e & echo. & echo  No input file^(s^) or folder^(s^) to encode! use 'Send to' context menu ...
 copy /y "%~f0" "%APPDATA%\Microsoft\Windows\SendTo\Compressed 2 TXT.bat" >nul 2>nul & goto :End
@@ -9,6 +9,7 @@ set "USE_LINES=%USE_LINES:1=$true%" & set "USE_LINES=%USE_LINES:0=$false%"
 set "USE_PREFIX=%USE_PREFIX:1=$true%" & set "USE_PREFIX=%USE_PREFIX:0=$false%"
 set/a nr=0 & set/a count=0 & for %%# in (%*) do set/a count+=1
 for %%# in (%*) do set/a nr+=1 & call :CompressOne "%%~#"
+powershell -noprofile -c "[io.file]::AppendAllText('%~nx1~.bat',\"`r`n:\" + \"bat2file\" + \": end`r`n\")"
 goto :End
 :CompressOne
 pushd %~dp1 & set "IsFile=yes" & for /f "tokens=1 delims=r-" %%# in ("%~a1") do if /i ".%%#"==".d" set "IsFile="
@@ -95,7 +96,7 @@ powershell -noprofile -c "$f=[io.file]::ReadAllText('%~f0') -split ':bat2file\:.
 if ($count -gt 0){ for ($i=1;$i -le $count;$i++) { $EXPANDER+="X $i;" } }
 $EXPANDER += "`"`r`nexit/b`r`n`r`n"
 $EXPANDER += @'
-:bat2file: Compressed2TXT v5.2
+:bat2file: Compressed2TXT v5.3
 Add-Type -Language CSharp -TypeDefinition @"
  using System.IO; public class BAT85{ public static void Decode(string tmp, string s) { MemoryStream ms=new MemoryStream(); n=0;
  byte[] b85=new byte[255]; string a85="0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!#$&()+,-./;=?@[]^_{|}~";
@@ -111,6 +112,5 @@ if ($nr -eq 1){[System.IO.File]::WriteAllLines($id+'.bat', $EXPANDER)}
 echo " "
 echo "BAT85 encoding $fn ..."
 [BAT85]::Encode($fn, $id+'.bat', $uselines, $useprefix);
-echo "DONE!"
-echo "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - "
+echo " - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - "
 :CompressPS: end
