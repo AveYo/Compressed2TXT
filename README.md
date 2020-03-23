@@ -23,7 +23,7 @@ improved MakeCab ddf generator to handle localized and special characters filena
 two pass MakeCab to reduce size of filenames tree as well  
 improved BAT85 encoder / decoder and added BAT91 alternative   
 improved handling of multiple selected files and folders as source  
-prompt to to accept or change the randomized decoding key  
+prompt to accept or change the randomized decoding key  
 original cmd / powershell hybrid; script-friendlier $choices variable  
 perfected handling of read-only target folder by saving to user Desktop  
 
@@ -37,7 +37,7 @@ To prevent copy/paste line-endings issues with the script, use github's [clone o
 ```bat
 cmd.exe /c del /f/q "%USERPROFILE%\AppData\Roaming\Microsoft\Windows\SendTo\Compressed 2 TXT.bat"  
 ```
-## bat85 encoder/decoder details  
+## BAT85 encoder/decoder details  
 Tweaked version of [Ascii85](https://en.wikipedia.org/wiki/Ascii85) that works well with batch syntax highlighter used by pastebin and others  
 
 Dictionary (can be randomized):  
@@ -70,8 +70,11 @@ n=0;}} if (p>0) {for (int i=0;i<5-p;i++) {n += 84 * p85[p+i];} q=4; while (q > p
 :bat2file:]
 ```
 
-## bat91 encoder/decoder details  
-Tweaked version of [base91](http://base91.sourceforge.net) that works well with batch syntax highlighter used by pastebin and others  
+## BAT91 encoder/decoder details  
+Tweaked version of [base91](http://base91.sourceforge.net) that works ok with batch syntax highlighter used by pastebin and others.  
+Same dictionary as BAT85 plus ``<*`%\>`` characters that are less safe when posted online.  
+Generates 1.7% ~ 2% less size than BAT85, so if a BASE85 encode is just above a size limit - 512KB on pastebin for example,  
+BASE91 might make it fit, but otherwise keep using BASE85.  
 
 Dictionary (can be randomized):  
 ```
