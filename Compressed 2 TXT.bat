@@ -20,6 +20,26 @@ set "0=%~f0" & set 1=%*& powershell -nop -c iex ([io.file]::ReadAllText($env:0))
 # Quit if no choice made
   if ($result -eq $null) { write-host -fore Yellow "`n Canceled `n"; exit }
 
+# Choice 3: BAT91 encoder instead of BAT85 for ~1.7% less size, but will use some web-problematic chars <*`%\>
+  $key = '.,;{-}[+](/)_|^=?O123456A789BCDEFGHYIeJKLMoN0PQRSTyUWXVZabcdfghijklmnpqrvstuwxz!@#$&~'; $chars = 85
+  if ($selected[3]) {
+    $key = '.,;{-}[+](/)_|^=?O123456789ABCDeFGHyIdJKLMoN0PQRSTYUWXVZabcfghijklmnpqrstuvwxz!@#$&~E<*`%\>'; $chars = 91
+  }
+
+# Choice 2: Randomize decoding key - characters matter, order does not, so it can be randomized and used as decoding password
+  if ($selected[2]) {
+    $base = [System.Text.Encoding]::ASCII.GetBytes($key); $rnd = new-object Random; $i = 0; $j = 0; $t = 0
+    while ($i -lt $chars) {$t = $base[$i]; $j = $rnd.Next($i, $chars); $base[$i] = $base[$j]; $base[$j] = $t; $i++}
+    $key = [System.Text.Encoding]::ASCII.GetString($base)
+  }
+
+# Choice 1+2: Show InputBox to accept or change the randomized decoding key
+  if ($selected[1] -and $selected[2]) {
+    Add-Type -As 'Microsoft.VisualBasic'
+    $key = [Microsoft.VisualBasic.Interaction]::InputBox('Press enter to accept randomized key:', 'BAT'+$chars, $key).Trim()
+    if (!$key -or $key.Length -ne $chars) {write-host "`n ERROR! Key must be $chars chars long `n" -fore Yellow; exit}
+  }
+
 # Process command line arguments
   $arg = ([regex]'"[^"]+"|[^ ]+').Matches($env:1)
   $val = gi -force -lit $arg[0].Value.Trim('"')
@@ -80,19 +100,6 @@ set "0=%~f0" & set 1=%*& powershell -nop -c iex ([io.file]::ReadAllText($env:0))
 
 # Choice 4: No long lines (adds more overhead) - each line has 4 extra chars (cr lf ::) and short lines are ~8 times as many
   if ($selected[4]) {$line = 124} else {$line = 1014}
-
-# Choice 3: BAT91 encoder instead of BAT85 for ~1.7% less size, but will use some web-problematic chars <*`%\>
-  $key = '.,;{-}[+](/)_|^=?O123456A789BCDEFGHYIeJKLMoN0PQRSTyUWXVZabcdfghijklmnpqrvstuwxz!@#$&~'; $chars = 85
-  if ($selected[3]) {
-    $key = '.,;{-}[+](/)_|^=?O123456789ABCDeFGHyIdJKLMoN0PQRSTYUWXVZabcfghijklmnpqrstuvwxz!@#$&~E<*`%\>'; $chars = 91
-  }
-
-# Choice 2: Randomize decoding key - characters matter, order does not, so it can be randomized and used as decoding password
-  if ($selected[2]) {
-    $base = [System.Text.Encoding]::ASCII.GetBytes($key); $rnd = new-object Random; $i = 0; $j = 0; $t = 0
-    while ($i -lt $chars) {$t = $base[$i]; $j = $rnd.Next($i, $chars); $base[$i] = $base[$j]; $base[$j] = $t; $i++}
-    $key = [System.Text.Encoding]::ASCII.GetString($base)
-  }
 
 # Choice 1: Input decoding key as password - or bundle it with the file for automatic extraction
   if ($selected[1]) {
