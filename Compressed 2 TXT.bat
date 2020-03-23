@@ -1,60 +1,64 @@
-<# :: Compressed2TXT v6.0 - Files/Folders "Send to" menu .bat ascii encoder by AveYo
-@echo off& color 07& chcp 65001 >nul
-set "0=%~f0" & set 1=%*& powershell -nop -c iex ([io.file]::ReadAllText($env:0)) &pause& exit/b
-#>$env:1; if (!$env:1) {write-host "`n No input files or folders to encode! use 'Send to' context menu ...`n" -fore Yellow
-  $s="$env:APPDATA\Microsoft\Windows\SendTo";if ($(Split-Path $env:0)-ne $s){copy $env:0 "$s\Compressed 2 TXT.bat" -force} exit}
-  $Main = {
+@(echo off% <#%) &color 07 &title Compressed2TXT v6.0 - Files/Folders "Send to" menu .bat ascii encoder by AveYo
+chcp 65001 >nul &set "0=%~f0" &set 1=%*& powershell -nop -c iex ([io.file]::ReadAllText($env:0)) &pause &exit/b ||#>)[1]
 
-# Available script choices $c with prefix number as hotkey to toggle; selected by default $d = 1
-  $c  = @()                                       ; $d  = @()
-  $c += '&1  Input decoding key as password      '; $d += 0
-  $c += '&2  Randomize decoding key (use with 1) '; $d += 0
-  $c += '&3  BAT91 encoder instead of BAT85 -1.7%'; $d += 0
-  $c += '&4  No long lines (adds more overhead)  '; $d += 1
-  $c += '&5  No LZX compression (full size)      '; $d += 0
-  $c += '&6  No txt encoding (cab archive only)  '; $d += 0
+$env:1; if (!$env:1) {write-host "`n No input files or folders to encode! use 'Send to' context menu ...`n" -fore Yellow
+$s="$env:APPDATA\Microsoft\Windows\SendTo"; if ($(Split-Path $env:0) -ne $s){copy $env:0 "$s\Compressed 2 TXT.bat" -force} exit}
 
-# Show choices dialog with texts $c and defaults $d selected - outputs indexes like '1,2,4'
-  $all = $c -join ','; $def = (($d -split "`n")|Select-String 1).LineNumber -join ','; $selected = @($false) * ($c.length + 1)
-  $result = Choices $all $def 'Compressed2txt' 14; if ($result) {$result -split ',' |% {$selected[[int]$_] = $true} }
-# Quit if no choice made
-  if ($result -eq $null) { write-host -fore Yellow "`n Canceled `n"; exit }
+$Main = {
+# Choice text - &x is optional hotkey toggle      # Choice value       # Default:1
+  $c  = @()                                       ; $v  = @()          ; $d  = @()
+  $c += '&1  Input decoding key as password      '; $v += 'password'   ; $d += 0
+  $c += '&2  Randomize decoding key (use with 1) '; $v += 'random'     ; $d += 0
+  $c += '&3  BAT91 encoder instead of BAT85 -1.7%'; $v += 'bat91'      ; $d += 0
+  $c += '&4  No long lines (adds more overhead)  '; $v += 'nolonglines'; $d += 1
+  $c += '&5  No LZX compression (full size)      '; $v += 'nocompress' ; $d += 0
+  $c += '&6  No txt encoding (cab archive only)  '; $v += 'cabonly'    ; $d += 0
+
+# Show choices dialog - outputs $result with indexes like '1,2,4' - query via ($selected[number]) or ($choices -eq 'value')
+  $all=$c -join ',';$def=(($d -split "`n")|Select-String 1).LineNumber -join ',';$choices=@();$selected=@($false)*($c.length+1)
+  $result = Choices $all $def 'Compressed2TXT' 14; $result -split ',' |% {$selected[[int]$_] = $true;$choices += $v[[int]$_-1]}
+# Quit if canceled (allows no selection)
+  if ($result -eq $null) {write-host "`n Canceled `n" -fore Yellow; exit} else {write-host $($choices -join ',')}
 
 # Choice 3: BAT91 encoder instead of BAT85 for ~1.7% less size, but will use some web-problematic chars <*`%\>
   $key = '.,;{-}[+](/)_|^=?O123456A789BCDEFGHYIeJKLMoN0PQRSTyUWXVZabcdfghijklmnpqrvstuwxz!@#$&~'; $chars = 85
-  if ($selected[3]) {
+  if ($choices -eq 'bat91') {
     $key = '.,;{-}[+](/)_|^=?O123456789ABCDeFGHyIdJKLMoN0PQRSTYUWXVZabcfghijklmnpqrstuvwxz!@#$&~E<*`%\>'; $chars = 91
   }
+  $dict = ($key.ToCharArray()|sort -unique) -join ''; $randomized = 'default'
 
 # Choice 2: Randomize decoding key - characters matter, order does not, so it can be randomized and used as decoding password
-  if ($selected[2]) {
-    $base = [System.Text.Encoding]::ASCII.GetBytes($key); $rnd = new-object Random; $i = 0; $j = 0; $t = 0
+  if ($choices -eq 'random' -and $choices -notcontains 'cabonly') {
+    $base = $key.ToCharArray(); $rnd = new-object Random; $i = 0; $j = 0; $t = 0
     while ($i -lt $chars) {$t = $base[$i]; $j = $rnd.Next($i, $chars); $base[$i] = $base[$j]; $base[$j] = $t; $i++}
-    $key = [System.Text.Encoding]::ASCII.GetString($base)
+    $key = $base -join ''; $randomized = 'randomized'
   }
 
-# Choice 1+2: Show InputBox to accept or change the randomized decoding key
-  if ($selected[1] -and $selected[2]) {
+# Choice 1: Show InputBox to accept or change the decoding key, and verify it matches the BAT91 or BAT85 $dict
+  if ($choices -eq 'password' -and $choices -notcontains 'cabonly') {
     Add-Type -As 'Microsoft.VisualBasic'
-    $key = [Microsoft.VisualBasic.Interaction]::InputBox('Press enter to accept randomized key:', 'BAT'+$chars, $key).Trim()
-    if (!$key -or $key.Length -ne $chars) {write-host "`n ERROR! Key must be $chars chars long `n" -fore Yellow; exit}
+    $key = [Microsoft.VisualBasic.Interaction]::InputBox("Press enter to accept $randomized key:", 'BAT'+$chars, $key)
+    if (!$key -or $key.Trim().Length -ne $chars -or (($key.Trim().ToCharArray()|sort -unique) -join '') -ne $dict) {
+      write-host "`nERROR! Key must be $chars chars long containing only non-repeating:" -fore Yellow; echo "$dict`n"; exit
+    }
   }
 
-# Process command line arguments
+# Process command line arguments - supports multiple files and folders
   $arg = ([regex]'"[^"]+"|[^ ]+').Matches($env:1)
   $val = gi -force -lit $arg[0].Value.Trim('"')
   $fn1 = $val.Name
 # Setup work and output dirs
-  $top = Split-Path $val; sl -lit $top; $rng = [Guid]::NewGuid().Guid; mkdir $rng -force -ea 0|out-null # $drv = (gl).Drive.Root;
-  if ($([IO.DirectoryInfo]$rng).Exists) {$dir = $top; $work = "$top\$rng"}
-  else {$dir = "$env:USERPROFILE\Desktop"; $work = "$env:TEMP\$rng"; mkdir $work -force -ea 0|out-null}
-  pushd -lit $work
-# Grab target files
+  $top = Split-Path $val; $dir = $top; $rng = [Guid]::NewGuid().Guid; $work = Join-Path $dir -Child $rng
+  mkdir $work -force -ea 0|out-null
+  if (!(Test-Path -lit $work)) {
+    $dir = "$env:USERPROFILE\Desktop"; $work = Join-Path $dir -Child $rng; mkdir $work -force -ea 0|out-null
+  }
+  sl -lit $work
+# Grab target files names
   $files = @()
   foreach ($a in $arg) {
     $f = gi -force -lit $a.Value.Trim('"')
-    if ($f.PSTypeNames -match 'FileInfo') {$files += $f}
-    else {dir -lit $f -rec -force |? {!$_.PSIsContainer} |% {$files += $_}}
+    if ($f.PSTypeNames -match 'FileInfo') {$files += $f} else {dir -lit $f -rec -force |? {!$_.PSIsContainer} |% {$files += $_}}
   }
 
 # Improved MakeCab ddf generator to handle localized and special characters file names better
@@ -66,30 +70,34 @@ set "0=%~f0" & set 1=%*& powershell -nop -c iex ([io.file]::ReadAllText($env:0))
 .Set ReservePerCabinetSize=0`r`n.Set ReservePerDataBlockSize=0`r`n.Set ReservePerFolderSize=0`r`n.Set RptFileName=nul
 .Set UniqueFiles=ON`r`n.Set SourceDir=.`r`n
 "@
-  $ddf2 = $ddf1+"1.cab`r`n"; $cabinet = "$work\1.cab"; [int]$renamed = 100; $sub = $dir.Length + 1; if ($sub -eq 4) {$sub--}
+  $ddf2 = $ddf1+"1.cab`r`n"; $cabinet = "$work\1.cab"; [int]$renamed = 100; $rel = $top.Length + 1; if ($rel -eq 4) {$rel--}
+
+# Makecab tool has issues with source filenames so just rename them, while keeping destination filenames the same
   foreach ($f in $files){
-    copy -lit $f.FullName -dest $("$work\$renamed") -force -ea 0|out-null
-    $ddf1 += $("$renamed `""+$f.FullName.substring($sub)+"`"`r`n"); $renamed++
+    copy -lit $f.FullName -dest "$work\$renamed" -force -ea 0|out-null
+    $ddf1 += $("$renamed `""+$f.FullName.substring($rel)+"`"`r`n"); $renamed++
   }
 
+# Choice 6: No text encoding (cab archive only) - single pass
+  if ($choices -eq 'cabonly') {$comp = 'ON'} else {$comp = 'OFF'}
 # Choice 5: No LZX compression (full size)
-  if ($selected[5]) {$comp = 'OFF'} else {$comp = 'ON'}
-# With default choices MakeCab is done in two passes
-  if (!$selected[5] -and !$selected[6]) {$comp = 'OFF'}
-# MakeCab first pass just stores the files without compression
+  if ($choices -eq 'nocompress') {$comp = 'OFF'}
+# With default choices MakeCab is done in two passes, first just stores the files without compression
   [IO.File]::WriteAllText("$work\1.ddf", $ddf1, [Text.Encoding]::UTF8)
-  makecab.exe /F 1.ddf /D Compress=$comp /D CabinetNameTemplate=1.cab
   write-host
-# MakeCab second pass LZX compresses the potentially large tree of filenames as well
-  if (!$selected[5] -and !$selected[6]) {
+  makecab.exe /F 1.ddf /D Compress=$comp /D CabinetNameTemplate=1.cab
+# Choice 6: No text encoding (cab archive only) - if selected script ends right after this
+  if ($choices -eq 'cabonly') {
+    copy -lit $cabinet -dest $(Join-Path $dir -Child "$fn1~.cab") -force -ea 0
+    sl -lit $top; rmdir -lit $work -rec -force -ea 0|out-null
+    exit
+  }
+# With default choices MakeCab second pass LZX compresses the potentially large tree of filenames as well
+  if ($choices -notcontains 'nocompress') {
     $cabinet = "$work\1.ca_"
     [IO.File]::WriteAllText("$work\2.ddf", $ddf2, [Text.Encoding]::UTF8)
-    makecab.exe /F 2.ddf /D Compress=ON /D CabinetNameTemplate=1.ca_
     write-host
-  }
-# Choice 6: No text encoding (cab archive only)
-  if ($selected[6]) {
-    copy -lit $cabinet -dest "$dir\$fn1~.cab" -force -ea 0; popd; cmd /c rmdir /s/q "`"$work`""; exit
+    makecab.exe /F 2.ddf /D Compress=ON /D CabinetNameTemplate=1.ca_
   }
 
 # Text encoding - compact self-expanding batch file bundling ascii encoded with BAT91 cab archive of target files
@@ -99,10 +107,10 @@ set "0=%~f0" & set 1=%*& powershell -nop -c iex ([io.file]::ReadAllText($env:0))
   $HEADER += "`r`n@pause& exit/b`r`n`r`n:bat2file: Compressed2TXT v6.0`r`n"
 
 # Choice 4: No long lines (adds more overhead) - each line has 4 extra chars (cr lf ::) and short lines are ~8 times as many
-  if ($selected[4]) {$line = 124} else {$line = 1014}
+  if ($choices -eq 'nolonglines') {$line = 124} else {$line = 1014}
 
 # Choice 1: Input decoding key as password - or bundle it with the file for automatic extraction
-  if ($selected[1]) {
+  if ($choices -eq 'password') {
     $HEADER += '$b=''Microsoft.VisualBasic'';Add-Type -As $b;$k=iex "[$b.Interaction]::InputBox(''Key'','+$chars+')";'
     $HEADER += 'if($k.Length-ne'+$chars+'){exit} Add-Type -Ty @' + "'`r`n"
   } else {
@@ -110,7 +118,7 @@ set "0=%~f0" & set 1=%*& powershell -nop -c iex ([io.file]::ReadAllText($env:0))
   }
 
 # Generate text decoding C# snippet depending on Choice 3: BAT91 encoder instead of BAT85
-  if ($selected[3]) {
+  if ($choices -eq 'bat91') {
     $HEADER += @'
 using System.IO; public class BAT91 {public static void Dec (ref string[] f, int x, string fo, string key) { unchecked {
 byte[] b91=new byte[256]; int n=0,c=255,v=91,q=0,z=f[x].Length; while (c>0) b91[c--]=91; while(c<91) b91[key[c]]=(byte)c++;
@@ -129,42 +137,43 @@ n=0;}} if (p>0) {for (int i=0;i<5-p;i++) {n += 84 * p85[p+i];} q=4; while (q > p
   }
 
 # Generate expand function (must run twice if compressed in two passes)
-#  $HEADER += 'function X([int]$x=1) {[BAT91]::Dec([ref]$f,$x+1,'
-  if (!$selected[5] -and !$selected[6]) {
-    $HEADER += '"1.ca_",$k); @("1.ca_","1.cab") |% {expand -R $_ -F:* .; del $_ -force}}'
-  } else {
+  if ($choices -eq 'nocompress') {
     $HEADER += '"1.cab",$k); expand -R "1.cab" -F:* .; del "1.cab" -force}'
+  } else {
+    $HEADER += '"1.ca_",$k); @("1.ca_","1.cab") |% {expand -R $_ -F:* .; del $_ -force}}'
   }
   $HEADER += "`r`n`r`n:bat2file:[ $fn1`r`n"
 
 # BAT91 or BAT85 ascii encoding of cab file containing target files
-  $output = "$dir\$fn1~.bat"
+  $output = Join-Path $dir -Child "$fn1~.bat"; $outputkey = Join-Path $dir -Child "$fn1~key.ini"
   [IO.File]::WriteAllText($output, $HEADER)
-  write-host -fore Green "`r`nBAT91 encoding $fn1~.bat ..."; $timer=new-object Diagnostics.StopWatch; $timer.Start()
-  if ($selected[3]) {
+  write-host "`nBAT$chars encoding $output ..." -fore Green
+  $timer=new-object Diagnostics.StopWatch; $timer.Start()
+  if ($choices -eq 'bat91') {
     [BAT91]::Enc($cabinet, $output, $key, $line)
   } else {
     [BAT85]::Enc($cabinet, $output, $key, $line)
   }
   $timer.Stop()
-  write-host "$($timer.Elapsed.TotalSeconds) seconds`r`n"
+  write-host "$($timer.Elapsed.TotalSeconds) seconds `n"
   [IO.File]::AppendAllText($output, "`r`n:bat2file:]`r`n")
 
 # Choice 1: Input decoding key as password - saving decoding key externally
-  if ($selected[1]) {
-    [IO.File]::WriteAllText("$dir\$fn1~key.ini", $key)
-    write-host -fore Yellow "decoding key saved separately to $fn1~key.ini"
-  } else { del "$dir\$fn1~key.ini" -force -ea 0 }
+  if ($choices -eq 'password') {
+    [IO.File]::WriteAllText($outputkey, $key)
+    write-host "decoding key saved separately to $fn1~key.ini" -fore Yellow; write-host "$key`n"
+  } else {del $outputkey -force -ea 0|out-null}
 
-# Done - cleanup work dir
-  popd; cmd /c rmdir /s/q "`"$work`""
+# Done - cleanup $work dir
+  sl -lit $top; rmdir -lit $work -rec -force -ea 0|out-null
 }
+
 ############
 # Snippets #
 ############
 
 # Text encoding snippet via C# (native powershell is unbearable slow for large files)
-  Add-Type -Ty @'
+Add-Type -Ty @'
 using System.IO;
 public class BAT85 {
   public static void Enc(string fi, string fo, string key, int line) {
@@ -212,18 +221,18 @@ public class BAT91 {
 '@
 
 # Choices dialog snippet - parameters: 1=allchoices, 2=default; [optional] 3=title, 4=textsize, 5=backcolor, 6=textcolor
-  function Choices($all, $def, $n='Choices', [byte]$sz=12, $bc='MidnightBlue', $fc='Snow', $saved='HKCU:\Environment'){
-[void][System.Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms'); $f=new-object Windows.Forms.Form
-$a=$all.split(','); $s=$def.split(','); $reg=gp $saved -ea 0; if($reg){ $s=$reg.$n.split(',') };
-function rst(){ $cb | %{ $_.Checked=0; if($s -contains $_.Name){ $_.Checked=1 } } }; $f.Add_Shown({rst; $f.Activate()})
-$cb=@(); $i=1; $a | %{ $c=new-object Windows.Forms.CheckBox; $cb+=$c; $c.Text=$_; $c.AutoSize=1;
-$c.Margin='8,4,8,4'; $c.Location='64,'+($sz*3*$i-$sz); $c.Font='Tahoma,'+$sz; $c.Name=$i; $f.Controls.Add($c); $i++}
-$bt=@(); $j=1; @('OK','Reset','Cancel') | %{ $b=new-object Windows.Forms.Button; $bt+=$b; $b.Text=$_; $b.AutoSize=1;
-$b.Margin='0,0,72,20'; $b.Location=''+(64*$j)+','+(($sz+1)*3*$i-$sz); $b.Font='Tahoma,'+$sz; $f.Controls.Add($b); $j+=2 }
-$v=@(); $f.AcceptButton=$bt[0]; $f.CancelButton=$bt[2]; $bt[0].DialogResult=1; $bt[1].add_Click({$s=$def.split(',');rst});
-$f.Text=$n; $f.BackColor=$bc; $f.ForeColor=$fc; $f.StartPosition=4; $f.AutoSize=1; $f.AutoSizeMode=0; $f.FormBorderStyle=3;
-$f.MaximizeBox=0; $r=$f.ShowDialog(); if($r -eq 1){$cb | %{if($_.Checked){$v+=$_.Name}}; $val=$v -join ','
-if($r -eq 0){return $null} $null=New-ItemProperty -Path $saved -Name $n -Value $val -Force; return $val } }
+function Choices($all, $def, $n='Choices', [byte]$sz=12, $bc='MidnightBlue', $fc='Snow', $saved='HKCU:\Environment'){
+ [void][Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms'); $f=new-object Windows.Forms.Form
+ $a=$all.split(','); $s=$def.split(','); $reg=gp $saved -ea 0; if($reg){ $s=$reg.$n.split(',') };
+ function rst(){ $cb | %{ $_.Checked=0; if($s -contains $_.Name){ $_.Checked=1 } } }; $f.Add_Shown({rst; $f.Activate()})
+ $cb=@(); $i=1; $a | %{ $c=new-object Windows.Forms.CheckBox; $cb+=$c; $c.Text=$_; $c.AutoSize=1;
+ $c.Margin='8,4,8,4'; $c.Location='64,'+($sz*3*$i-$sz); $c.Font='Tahoma,'+$sz; $c.Name=$i; $f.Controls.Add($c); $i++}
+ $bt=@(); $j=1; @('OK','Reset','Cancel') | %{ $b=new-object Windows.Forms.Button; $bt+=$b; $b.Text=$_; $b.AutoSize=1;
+ $b.Margin='0,0,72,20'; $b.Location=''+(64*$j)+','+(($sz+1)*3*$i-$sz); $b.Font='Tahoma,'+$sz; $f.Controls.Add($b); $j+=2 }
+ $v=@(); $f.AcceptButton=$bt[0]; $f.CancelButton=$bt[2]; $bt[0].DialogResult=1; $bt[1].add_Click({$s=$def.split(',');rst});
+ $f.Text=$n; $f.BackColor=$bc; $f.ForeColor=$fc; $f.StartPosition=4; $f.AutoSize=1; $f.AutoSizeMode=0; $f.FormBorderStyle=3;
+ $f.MaximizeBox=0; $r=$f.ShowDialog(); if($r -eq 1){$cb | %{if($_.Checked){$v+=$_.Name}}; $val=$v -join ','
+ if($r -eq 0){return $null} $null=New-ItemProperty -Path $saved -Name $n -Value $val -Force; return $val } }
 # Let's Make Console Scripts Friendlier Initiative by AveYo - MIT License -          Choices '&one, two, th&ree' '2,3' 'Usage'
 
 & $Main
