@@ -4,7 +4,7 @@ Very fast encoding and decoding BAT85 class
 Multiple file(s) and folder(s) "Send to" selection  
 Optional line split and prefix  
 
-## What's new in 6.0:  
+## What's new in v6.0:  
 - GUI Options:  
 option 1: Input decoding key as password - saved in external file "output~key.ini"  
 ~ generates GUI prompt to input key, for convenience  
@@ -186,9 +186,12 @@ do {o.WriteByte((byte)q); q >>= 8; n -= 8;} while (n>7);} } if (v != 91) o.Write
 :bat2file:]
 ```
 
-## Intuitive multiple files support with low overhead - must use the same key for all - to be revised for 6.0+
+## Intuitive multiple files support with low overhead  
+### must use the same key for all
 _A single decoding block that needs to be placed before the file data. By default batch script decodes all bundled files in one go, but it can be split into individual files anywhere in the script:_  
-`set "0=%~f0"&powershell -nop -c cd -li(Split-Path $env:0);$f=[IO.File]::ReadAllText($env:0)-split':bat2file\:.*';iex($f[1]); X 2`  
-`...`  
-`set "0=%~f0"&powershell -nop -c cd -li(Split-Path $env:0);$f=[IO.File]::ReadAllText($env:0)-split':bat2file\:.*';iex($f[1]); X 4`  
+```bat
+set "0=%~f0"&powershell -nop -c cd -li(Split-Path $env:0);$f=[IO.File]::ReadAllText($env:0)-split':bat2file\:.*';iex($f[1]); X 2  
+:: ...  
+set "0=%~f0"&powershell -nop -c cd -li(Split-Path $env:0);$f=[IO.File]::ReadAllText($env:0)-split':bat2file\:.*';iex($f[1]); X 4  
+```
 _where `X 2;` calls the decoding block to extract the 2nd file data, while `X 4;` - the 4th_  
