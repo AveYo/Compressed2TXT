@@ -3,6 +3,9 @@ Windows 7 support ( PowerShell 2.0 / C# 2.0 )
 Very fast encoding and decoding BAT85 and BAT91 classes  
 Multiple file(s) and folder(s) "Send to" menu selection  
 
+![preview](preview.png)
+
+
 ## What's new in v6.0 final:  
 GUI option 1: Input decoding key as password - saved in external file "output~key.ini"  
 GUI option 2: Randomize decoding key (use with 1)  
