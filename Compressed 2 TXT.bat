@@ -224,7 +224,7 @@ public class BAT91 {
 # Choices dialog snippet - parameters: 1=allchoices, 2=default; [optional] 3=title, 4=textsize, 5=backcolor, 6=textcolor
 function Choices($all, $def, $n='Choices', [byte]$sz=12, $bc='MidnightBlue', $fc='Snow', $saved='HKCU:\Environment'){
  [void][Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms'); $f=new-object Windows.Forms.Form
- $a=$all.split(','); $s=$def.split(','); $reg=(gp $saved -ea 0).$n; if($reg.length) {$s=$reg.$n.split(',')}
+ $a=$all.split(','); $s=$def.split(','); $reg=(gp $saved -ea 0).$n; if($reg.length) {$s=$reg.split(',')}
  function rst(){ $cb | %{ $_.Checked=0; if($s -contains $_.Name){ $_.Checked=1 } } }; $f.Add_Shown({rst; $f.Activate()})
  $cb=@(); $i=1; $a | %{ $c=new-object Windows.Forms.CheckBox; $cb+=$c; $c.Text=$_; $c.AutoSize=1;
  $c.Margin='8,4,8,4'; $c.Location='64,'+($sz*3*$i-$sz); $c.Font='Tahoma,'+$sz; $c.Name=$i; $f.Controls.Add($c); $i++}
