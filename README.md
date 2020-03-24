@@ -33,6 +33,144 @@ That's still quite hard to crack: 85 or 91 minus 6 _(MSCAB. :D)_ \*factorial com
 Reusing the key is a must when adding multiple bundled files in the same script - all have to use the same key!  
 Script will verify if input key matches the length and base dictionary and if not provide the information  
 
+### Finding the right options for your target files  
+Script has plenty of GUI choices to help you determine the best course of action for the specific file(s).
+By default script will be doing 2-pas mscab compression, first grabing files uncompressed, then LZX compress them.  
+This works best with really deep directory structure and lots of small files.  
+For monolithic huge files that are not very compressible, you should select option __5: No LZX compression (full size)__  
+A ridiculous 259.45MB source file "achieving" 98.94% compression is not worth the extra 4min38s for saving 1.06%  
+<details>
+  <summary>Practical example (click here to show)</summary>
+  
+Let's say we want something pointless as encoding a huge boot.wim from a mounted iso:   
+Already know it's not a compressible file so we can save time directly selecting option __5: No LZX compression__  
+
+but just to confirm it, run with just the option __6: No text encoder (cab archive only)__  
+```
+F:\sources\boot.wim
+cabonly
+
+Cabinet Maker - Lossless Data Compression Tool
+
+272,062,257 bytes in 1 files
+Total files:              1
+Bytes before:   272,062,257
+Bytes after:    269,188,732
+After/Before:            98.94% compression
+Time:                   278.01 seconds ( 0 hr  4 min 38.01 sec)
+Throughput:             955.66 Kb/second
+```
+_not very compressible 256.78MB, and took almost 5 mins_  
+
+let's see how it is going to be also adding option __5: No LZX compression__  
+```
+F:\sources\boot.wim
+nocompress,cabonly
+
+Cabinet Maker - Lossless Data Compression Tool
+
+272,062,257 bytes in 1 files
+Total files:              1
+Bytes before:   272,062,257
+Bytes after:    272,062,257
+After/Before:           100.00% compression
+Time:                    36.97 seconds ( 0 hr  0 min 36.97 sec)
+Throughput:            7187.11 Kb/second
+```
+_259.52MB, and took just 37 seconds, so it makes much more sense to encode with option 5_  
+
+let's do the actual text encoding, first with defaults:  
+```
+F:\sources\boot.wim
+nolonglines
+
+Cabinet Maker - Lossless Data Compression Tool
+
+272,062,257 bytes in 1 files
+Total files:              1
+Bytes before:   272,062,257
+Bytes after:    272,062,257
+After/Before:           100.00% compression
+Time:                    36.60 seconds ( 0 hr  0 min 36.60 sec)
+Throughput:            7258.98 Kb/second
+
+Cabinet Maker - Lossless Data Compression Tool
+
+272,128,750 bytes in 1 files
+Total files:              1
+Bytes before:   272,128,750
+Bytes after:    269,257,638
+After/Before:            98.94% compression
+Time:                   269.88 seconds ( 0 hr  4 min 29.88 sec)
+Throughput:             984.71 Kb/second
+
+BAT85 encoding C:\Users\z\Desktop\boot.wim~.bat ...
+8.8713828 seconds
+```
+_331.33MB and 5 mins, as expected_  
+
+then encode with option __5: No LZX compression__  
+```
+F:\sources\boot.wim
+nolonglines,nocompress
+
+Cabinet Maker - Lossless Data Compression Tool
+
+272,062,257 bytes in 1 files
+Total files:              1
+Bytes before:   272,062,257
+Bytes after:    272,062,257
+After/Before:           100.00% compression
+Time:                    40.91 seconds ( 0 hr  0 min 40.91 sec)
+Throughput:            6494.56 Kb/second
+
+BAT85 encoding C:\Users\z\Desktop\boot.wim~.bat ...
+7.8508956 seconds
+```
+_334.78MB. As expected. For such large files is not worth saving 1-2MB for the cost of extra 4min30s_  
+
+Also for large files is best to uncheck the default choice __4: No long lines (more overhead)__  
+```
+F:\sources\boot.wim
+nocompress
+
+Cabinet Maker - Lossless Data Compression Tool
+
+272,062,257 bytes in 1 files
+Total files:              1
+Bytes before:   272,062,257
+Bytes after:    272,062,257
+After/Before:           100.00% compression
+Time:                    40.75 seconds ( 0 hr  0 min 40.75 sec)
+Throughput:            6519.90 Kb/second
+
+BAT85 encoding C:\Users\z\Desktop\boot.wim~.bat ...
+7.8476116 seconds
+```
+_325.68MB. When I say more overhead with No long lines - I mean it._  
+_Just unselecting choice 4 you save more than two-pass LZX compress, without the extra 4min30s time!_  
+
+How about using choice __3: BAT91 encoder instead of BAT85__  
+```
+F:\sources\boot.wim
+bat91,nocompress
+
+Cabinet Maker - Lossless Data Compression Tool
+
+272,062,257 bytes in 1 files
+Total files:              1
+Bytes before:   272,062,257
+Bytes after:    272,062,257
+After/Before:           100.00% compression
+Time:                    36.39 seconds ( 0 hr  0 min 36.39 sec)
+Throughput:            7300.26 Kb/second
+
+BAT91 encoding C:\Users\z\Desktop\boot.wim~.bat ...
+7.6984016 seconds
+```
+_320.33MB. BAM! The most efficient text encoder using just built-in tools in Windows 7+_
+</details>
+
 ## Typical usage  
 Used mostly for sharing configs / scripts / dumps / captures as plain-text on message boards that lack proper file attachments, or to safekeep, run multiple tests and sharing binaries in malware analysis tasks  
 
@@ -50,7 +188,9 @@ Dictionary (can be randomized):
 ```
 .,;{-}[+](/)_|^=?O123456A789BCDEFGHYIeJKLMoN0PQRSTyUWXVZabcdfghijklmnpqrvstuwxz!@#$&~
 ```
-Encoded example of this release with randomized key used as a password:  
+<details>
+  <summary>Encoded example of this release with randomized key used as a password:</summary>
+
 ```bat
 @echo off& color 07& chcp 65001 >nul
 set "0=%~f0"&powershell -nop -c cd -li(Split-Path $env:0);$f=[IO.File]::ReadAllText($env:0)-split':bat2file\:.*';iex($f[1]); X 1
@@ -75,6 +215,7 @@ n=0;}} if (p>0) {for (int i=0;i<5-p;i++) {n += 84 * p85[p+i];} q=4; while (q > p
 ::-3D_1|QLuvsmog}y-FH9_IRv1QfGr4_H,fQ#Q&,?1CLv7/T6d3s2M@S?P{tl,V@fP@P1MFm36LY(lq6N?dW!8##2iUg|LG;gTDIYdG|q/{(P!gj$NGOnqSXVt;4ZQ?AB}$S8WLa@=B,gQ}x-6Wpb#Y&?4QwX.g(,;j7feA)~1V6Q@aG7IP@YGG75!hE|50kgntVB7K6.h8J[~@FU-u,fr)DyZ0ci4)B7X=.d}0=L92}OxNxtE&JcCB/A-F+(}I,#+xE]#c[qRpLCn9OinEHg[?,77-P^fU!fP|iJ?u8SDyhj=mW7UQFg^dlWO[7=e]qCFU^XE](w9gq]26zHbnt&2!p7gsZvQ[.jxc[K87I]PVg{K,-rIhxx#$6E/8_/&4#Nm!~6ye]zl}1VH+--Eu9MU;;2a{+l??9J8Vu+]u]Dqv5fdx$C9EiL2y(cX/ihr8FyRso(E[hm7)&l~?H0-1eBGj6^?R-v{)+it8W@$bC;XTIX4bVv;Plqs^OYJ#2({vUJJE57SyEFDriLbal8qIk(+2ahW[[7Z$xYWOGt6)dxICYZqrYQ#q!@/r^V_UiFKBes-h&Tn~,of{HzDu$.rL}.dW6+&ja&y.C-wAC|G5aO!D0e87{iBVOVun!$X|WfV.]3{p,.CCahM2+pEv!NH4g?aRK|pQgrO[smmp[JhTBzJ}=eSh5dv[hEGw/9CNH^p7ji56[Oo-,+-bwTBu=Y9d(dmC(XY7PnBBse^x/s|/]vUK+aYMi]wj~^F3Woe9(Fs}o_y=8Kj,;{rp=0i8tQfzj9R{pu&RA^A2+G
 :bat2file:]
 ```
+</details>
 
 ## BAT91 encoder/decoder details  
 Tweaked version of [base91](http://base91.sourceforge.net) that works ok with batch syntax highlighter used by pastebin and others.  
@@ -86,7 +227,9 @@ Dictionary (can be randomized):
 ```
 .,;{-}[+](/)_|^=?O123456789ABCDeFGHyIdJKLMoN0PQRSTYUWXVZabcfghijklmnpqrstuvwxz!@#$&~E<*`%\>
 ```
-Encoded example of this release with randomized key bundled for auto-extract:  
+<details>
+  <summary>Encoded example of this release with randomized key bundled for auto-extract:</summary>
+
 ```bat
 @echo off& color 07& chcp 65001 >nul
 set "0=%~f0"&powershell -nop -c cd -li(Split-Path $env:0);$f=[IO.File]::ReadAllText($env:0)-split':bat2file\:.*';iex($f[1]); X 1
@@ -111,6 +254,7 @@ do {o.WriteByte((byte)q); q >>= 8; n -= 8;} while (n>7);} } if (v != 91) o.Write
 ::LGG,}X.Y5,1N}?p_E|MO3iHtEwXSR$22,ZTK^FOQd7Y.k?gZ=wyj6;uRL0iB#qx3kSJ9C+Q=HwY\sFE1@!?)@rlh0b4$[rVHs0-J|+Vsfl$%9Z|h;t@86z4xiv?@p&;QT6?#IB1v;3[8.(E=^WzzR7Dt+Pm!E1%0G]1zOXcz1a5hH3qf&4rfVD9s\y!*D{pa/ufyW$qlVqnS8xW\w|73HAB\@Qe1`bhwz3-r)/}E;6az^JA+tQj})YEJaIIOU_MF&S,0$BKF05?a]/U$2FgK8}bQH2r?!ny3l*KUYsE*RUJ|W_X^5QY+FA9@S8(*6`+Tze~Rg8OWbd??jIdRDR(&Lq#RAH6Olr(XnE-$AMTZ_j45^]C3nFQxaw/cOpUE+({eMfP-[Nt9DCtqfvKE?$l0}}4?,vJ\?lz.#33LI<D$u|C.W9ji4DYCKDzbx^fxZtu4|`Qos`Snew/O.)w53ipM+y{Fs=TiH5\JL*!VAVa_v/6+;8+CjrE6oA<14@MP#<e05pAQbK77hTp#`,MjY5[#-;bGk?&M(<vanXN\@hlhI=W\!-SUh_lIeD/G?U3k#h97m)p#PBOSMZe>R`XHq+;VY*gbdcpL(sbQjWiA[tp@<eTVne@*v3LC$wNK`p\x>PNsdu4KWLw~8v4|Hj;Dv+Q(>xiJ]._Db)q6^?8gW{).HKXVb$>`(
 :bat2file:]
 ```
+</details>
 
 ## Intuitive multiple encoded files support with low overhead
 One-liner trigger for multiple bundled files decode in one go:  
