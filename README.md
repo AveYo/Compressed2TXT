@@ -4,28 +4,31 @@ Very fast encoding and decoding BAT85 and BAT91 classes
 Multiple file(s) and folder(s) "Send to" menu selection  
 
 ## What's new in v6.0 final:  
-GUI Options:  
-~ option 1: Input decoding key as password - saved in external file "output~key.ini"  
-generates GUI prompt to input key, for convenience  
-BAT85 has a 85 characters key, while BAT91 has a 91 characters key  
-to make it meaningful select option 2: Randomize decoding key  
-strength is good enough (85-6 or 91-6 \*factorial combinations)  
+GUI option 1: Input decoding key as password - saved in external file "output~key.ini"  
+GUI option 2: Randomize decoding key (use with 1)  
+GUI option 3: BAT91 encoder instead of BAT85 -1.7% size but uses web-problematic chars ``<*`%\>``  
+GUI option 4: No long lines (adds more overhead)  
+GUI option 5: No LZX compression (full size)  
+GUI option 6: No txt encoding (cab archive only)  
 
-~ option 2: Randomize decoding key (use with 1)  
-~ option 3: BAT91 encoder instead of BAT85 -1.7% size but uses web-problematic chars ``<*`%\>``  
-~ option 4: No long lines (adds more overhead)  
-~ option 5: No LZX compression (full size)  
-~ option 6: No txt encoding (cab archive only)  
-
-:: prefix to disable syntax highlight in advanced text viewers is always used  
-encoded text is either split at 128 chars or at <1024 chars to keep lame new windows notepad happy  
+__::__ prefix to disable syntax highlight in advanced text viewers is always used  
+encoded text is either split at __128__ chars or at __<1024__ chars to keep lame new windows notepad happy  
 improved MakeCab ddf generator to handle localized and special characters filenames better  
 two pass MakeCab to reduce size of filenames tree as well  
 improved BAT85 encoder / decoder and added BAT91 alternative   
 improved handling of multiple selected files and folders as source  
 prompt to accept or change the randomized decoding key  
-original cmd / powershell hybrid; script-friendlier $choices variable  
+original cmd / powershell hybrid; script-friendlier $choices variable; fixed Choices dialog 1st run warning  
 perfected handling of read-only target folder by saving to user Desktop  
+
+### More about option 1: Input decoding key as password  
+Yes you can definitely put your own / reuse a randomized key, that's what the option is for and it works great!  
+but it must be strictly 85 chars long if using default BAT85 or 91 chars long if using new BAT91,  
+and it must use only non-repeating characters from the base dictionary.  
+__In other words, you can only shuffle the characters around, not add new or repeat them__ (without editing the script)  
+That's still quite hard to crack: 85 or 91 minus 6 _(MSCAB. :D)_ \*factorial combinations!  
+Reusing the key is a must when adding multiple bundled files in the same script - all have to use the same key!  
+Script will verify if input key matches the length and base dictionary and if not provide the information  
 
 ## Typical usage  
 Used mostly for sharing configs / scripts / dumps / captures as plain-text on message boards that lack proper file attachments, or to safekeep, run multiple tests and sharing binaries in malware analysis tasks  
@@ -44,7 +47,7 @@ Dictionary (can be randomized):
 ```
 .,;{-}[+](/)_|^=?O123456A789BCDEFGHYIeJKLMoN0PQRSTyUWXVZabcdfghijklmnpqrvstuwxz!@#$&~
 ```
-Encoded example of this release:  
+Encoded example of this release with randomized key used as a password:  
 ```bat
 @echo off& color 07& chcp 65001 >nul
 set "0=%~f0"&powershell -nop -c cd -li(Split-Path $env:0);$f=[IO.File]::ReadAllText($env:0)-split':bat2file\:.*';iex($f[1]); X 1
@@ -80,7 +83,7 @@ Dictionary (can be randomized):
 ```
 .,;{-}[+](/)_|^=?O123456789ABCDeFGHyIdJKLMoN0PQRSTYUWXVZabcfghijklmnpqrstuvwxz!@#$&~E<*`%\>
 ```
-Encoded example of this release:  
+Encoded example of this release with randomized key used as a password:  
 ```bat
 @echo off& color 07& chcp 65001 >nul
 set "0=%~f0"&powershell -nop -c cd -li(Split-Path $env:0);$f=[IO.File]::ReadAllText($env:0)-split':bat2file\:.*';iex($f[1]); X 1
