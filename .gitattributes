@@ -1,2 +1,3 @@
 * text=auto
 * eol=crlf
+*.bat linguist-language=powershell
