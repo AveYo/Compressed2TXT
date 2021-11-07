@@ -1,5 +1,5 @@
 @(echo off% <#%) &color 07 &title Compressed2TXT v6.4 - Files/Folders SendTo menu ascii encoder and makecab by AveYo
-chcp 28591 >nul &set "0=%~f0" &set 1=%*& powershell -nop -c iex ([io.file]::ReadAllText($env:0)); &exit/b ||#>)[1]; $PS={
+chcp 850 >nul &set "0=%~f0" &set 1=%*& powershell -nop -c iex ([io.file]::ReadAllText($env:0)); &exit/b ||#>)[1]; $PS={
 
 ## Now defaults to BAT91 and short lines
 
@@ -9,7 +9,7 @@ $SendTo = [Environment]::GetFolderPath('ApplicationData') + '\Microsoft\Windows\
 ## Save to SendTo menu when run from another location as well as when copy-pasted directly into powershell console
 if (!$env:1 -and $env:0 -notlike '*\SendTo\Compressed 2 TXT*') {
  $BAT='@(echo off% <#%) &color 07 &title Compressed2TXT v6.4 - Files/Folders SendTo menu ascii encoder and makecab by AveYo'+"`n"
- $BAT+='chcp 28591 >nul &set "0=%~f0" &set 1=%*& powershell -nop -c iex ([io.file]::ReadAllText($env:0)); &exit/b ||#>)[1]'
+ $BAT+='chcp 850 >nul &set "0=%~f0" &set 1=%*& powershell -nop -c iex ([io.file]::ReadAllText($env:0)); &exit/b ||#>)[1]'
  $BAT+='; $PS={' + $PS + '}; .$PS; .$Main' + "`n#-.-# hybrid script, can be pasted directly into powershell console"
  [IO.File]::WriteAllLines($SendTo + '\Compressed 2 TXT.bat', $BAT -split "`r`n" -split "`n", [Text.Encoding]::ASCII)
 }
@@ -104,7 +104,7 @@ if (!$env:1) { timeout -1; return }
     return
   }
 ## Generate text decoding header - compact self-expanding batch file for bundled ascii encoded cab archive of target files
-  $HEADER  = "@echo off &chcp 65001 >nul &pushd `"%~dp0`"`r`n"
+  $HEADER  = "@echo off &chcp 850 >nul &pushd `"%~dp0`"`r`n"
   $HEADER += '@set "0=%~f0" &powershell -nop -c $f=[IO.File]::ReadAllText($env:0)-split'':bat2file\:.*'';iex($f[1]); X(1) '
   $HEADER += "&timeout /t 6 &exit/b`r`n`r`n:bat2file: Compressed2TXT v6.4`r`n"
 ## Choice 4: Long lines (less overhead) - each line has 4 extra chars (cr lf ::) and short lines are ~8 times as many
