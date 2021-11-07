@@ -1,5 +1,5 @@
-@(echo off% <#%) &color 07 &title Compressed2TXT v6.4 - Files/Folders SendTo menu makecab and ascii encoder by AveYo
-chcp 28591 >nul &set "0=%~f0" &set 1=%*& powershell -nop -c iex ([io.file]::ReadAllText($env:0)) &exit/b ||#>)[1]; $PS={
+@(echo off% <#%) &color 07 &title Compressed2TXT v6.4 - Files/Folders SendTo menu ascii encoder and makecab by AveYo
+chcp 28591 >nul &set "0=%~f0" &set 1=%*& powershell -nop -c iex ([io.file]::ReadAllText($env:0)); &exit/b ||#>)[1]; $PS={
 
 ## Now defaults to BAT91 and short lines
 
@@ -7,10 +7,9 @@ $Main={
 $env:1; if (!$env:1) {write-host "`n No input files or folders to encode! use 'Send to' context menu ...`n" -fore Yellow}
 $SendTo = [Environment]::GetFolderPath('ApplicationData') + '\Microsoft\Windows\SendTo'
 ## Save to SendTo menu when run from another location as well as when copy-pasted directly into powershell console
-# if (!$env:1 -and $env:0 -and $(Split-Path $env:0) -ne $SendTo) {copy $env:0 "$SendTo\Compressed 2 TXT.bat" -force}
-if (!$env:1 -and $env:0 -notlike '*Compressed 2 TXT*') {
+if (!$env:1 -and $env:0 -notlike '*\SendTo\Compressed 2 TXT*') {
  $BAT='@(echo off% <#%) &color 07 &title Compressed2TXT v6.4 - Files/Folders SendTo menu ascii encoder and makecab by AveYo'+"`n"
- $BAT+='chcp 28591 >nul &set "0=%~f0" &set 1=%*& powershell -nop -c iex ([io.file]::ReadAllText($env:0)) &exit/b ||#>)[1]'
+ $BAT+='chcp 28591 >nul &set "0=%~f0" &set 1=%*& powershell -nop -c iex ([io.file]::ReadAllText($env:0)); &exit/b ||#>)[1]'
  $BAT+='; $PS={' + $PS + '}; .$PS; .$Main' + "`n#-.-# hybrid script, can be pasted directly into powershell console"
  [IO.File]::WriteAllLines($SendTo + '\Compressed 2 TXT.bat', $BAT -split "`r`n" -split "`n", [Text.Encoding]::ASCII)
 }
