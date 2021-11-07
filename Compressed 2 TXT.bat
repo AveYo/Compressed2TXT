@@ -56,6 +56,8 @@ if (!$env:1) { timeout -1; return }
   $timer=new-object Diagnostics.StopWatch; $timer.Start()
 ## Process command line arguments - supports multiple files and folders
   $arg = ([regex]'"[^"]+"|[^ ]+').Matches($env:1)
+## first input item must exist, else something is wrong or script was used via commandline, not SendTo entry
+  if (!(test-path -lit $($arg[0].Value.Trim('"')))) {write-host "ERROR! path not found" -fore Yellow; timeout -1; return}
   $val = Get-Item -force -lit ($arg[0].Value.Trim('"'))
   $fn1 = $val.Name.replace('.','_')
 ## Setup work and output dirs - if source not writable fallback to user Desktop
