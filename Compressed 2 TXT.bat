@@ -1,5 +1,5 @@
-@(echo off% <#%) &color 07 &title Compressed2TXT v6.3 - Files/Folders SendTo menu makecab and ascii encoder by AveYo
-chcp 65001 >nul &set "0=%~f0" &set 1=%*& powershell -nop -c iex ([io.file]::ReadAllText($env:0)) &exit/b ||#>)[1]; $PS={
+@(echo off% <#%) &color 07 &title Compressed2TXT v6.4 - Files/Folders SendTo menu makecab and ascii encoder by AveYo
+chcp 28591 >nul &set "0=%~f0" &set 1=%*& powershell -nop -c iex ([io.file]::ReadAllText($env:0)) &exit/b ||#>)[1]; $PS={
 
 ## Now defaults to BAT91 and short lines
 
@@ -9,8 +9,8 @@ $SendTo = [Environment]::GetFolderPath('ApplicationData') + '\Microsoft\Windows\
 ## Save to SendTo menu when run from another location as well as when copy-pasted directly into powershell console
 # if (!$env:1 -and $env:0 -and $(Split-Path $env:0) -ne $SendTo) {copy $env:0 "$SendTo\Compressed 2 TXT.bat" -force}
 if (!$env:1 -and $env:0 -notlike '*Compressed 2 TXT*') {
- $BAT='@(echo off% <#%) &color 07 &title Compressed2TXT v6.3 - Files/Folders SendTo menu ascii encoder and makecab by AveYo'+"`n"
- $BAT+='chcp 65001 >nul &set "0=%~f0" &set 1=%*& powershell -nop -c iex ([io.file]::ReadAllText($env:0)) &exit/b ||#>)[1]'
+ $BAT='@(echo off% <#%) &color 07 &title Compressed2TXT v6.4 - Files/Folders SendTo menu ascii encoder and makecab by AveYo'+"`n"
+ $BAT+='chcp 28591 >nul &set "0=%~f0" &set 1=%*& powershell -nop -c iex ([io.file]::ReadAllText($env:0)) &exit/b ||#>)[1]'
  $BAT+='; $PS={' + $PS + '}; .$PS; .$Main' + "`n#-.-# hybrid script, can be pasted directly into powershell console"
  [IO.File]::WriteAllLines($SendTo + '\Compressed 2 TXT.bat', $BAT -split "`r`n" -split "`n", [Text.Encoding]::ASCII)
 }
@@ -59,14 +59,10 @@ if (!$env:1) { timeout -1; return }
   $val = Get-Item -force -lit ($arg[0].Value.Trim('"'))
   $fn1 = $val.Name.replace('.','_')
 ## Setup work and output dirs - if source not writable fallback to user Desktop
-  $top = Split-Path $val; $dir = $top; $rng = '\'+[Guid]::NewGuid().Guid; $work = $dir + $rng; $write = $work+'~'
-  mkdir $work -force -ea 0|out-null; New-Item $write -item File -force -ea 0|out-null
-  if (!(Test-Path -lit $work) -or !(Test-Path -lit $write)) {
-    rmdir -lit $work -force -ea 0|out-null
-    $dir = [Environment]::GetFolderPath("Desktop")
-    $work = $dir + $rng; mkdir $work -force -ea 0|out-null
-  }
-  del -lit $write -force -ea 0|out-null
+  $root = Split-Path $val; $rng = [Guid]::NewGuid().Guid
+  $dir = $root; $work = join-path $dir $rng; mkdir $work -ea 0 >''; new-item $($work + '~') -item File -ea 0 >''
+  if (!(test-path -lit $work)) {$dir = [Environment]::GetFolderPath("Desktop");$work = join-path $dir $rng; mkdir $work -ea 0 >''}
+  del $($work + '~') -force -ea 0 >''
 ## Grab target files names
   $files = @()
   foreach ($a in $arg) {
@@ -74,7 +70,7 @@ if (!$env:1) { timeout -1; return }
     if ($f.PSTypeNames -match 'FileInfo') {$files += $f} else {dir -lit $f -rec -force |? {!$_.PSIsContainer} |% {$files += $_}}
   }
 ## Jump to work dir
-  sl -lit $work
+  push-location -lit $work
 ## Improved MakeCab ddf generator to handle localized and special characters file names better
   $ddf1 = @"
 .new Cabinet`r`n.Set Cabinet=ON`r`n.Set CabinetFileCountThreshold=0`r`n.Set ChecksumWidth=1`r`n.Set ClusterSize=CDROM
@@ -85,10 +81,10 @@ if (!$env:1) { timeout -1; return }
 .Set UniqueFiles=ON`r`n.Set SourceDir=.`r`n
 "@
 ## MakeCab tool has issues with source filenames so just rename them while keeping destination full; skip inaccesible files
-  [int]$renamed = 100; $rel = $top.Length + 1; if ($rel -eq 4) {$rel--}
+  [int]$renamed = 100; $rel = $root.Length + 1; if ($rel -eq 4) {$rel--}
   foreach ($f in $files){
-    try{ copy -lit $f.FullName -dest "$work\$renamed" -force -ea 0|out-null }catch{}
-    if (Test-Path -lit "$work\$renamed") {$ddf1 += $("$renamed `""+$f.FullName.substring($rel)+"`"`r`n")}
+    try{ copy -lit $f.FullName -dest "$work\$renamed" -force -ea 0 >''}catch{}
+    if (test-path -lit "$work\$renamed") {$ddf1 += $("$renamed `""+$f.FullName.substring($rel)+"`"`r`n")}
     $renamed++
   }
   [IO.File]::WriteAllText("$work\1.ddf", $ddf1, [Text.Encoding]::UTF8)
@@ -101,7 +97,7 @@ if (!$env:1) { timeout -1; return }
     $output = $dir + "\$fn1~.cab"
     write-host "`nCAB archive only $output ..."
     move -lit "$work\1.cab" -dest $output -force -ea 0
-    sl -lit $top; rmdir -lit $work -rec -force -ea 0|out-null; if (Test-Path -lit $work) {$null=cmd /c rmdir /s/q "`"$work`""}
+    push-location -lit $root; if (test-path -lit $work) {start -nonew cmd "/d/x/c rmdir /s/q ""$work""" >''}
     $timer.Stop()
     write-host "`nDone in $([math]::Round($timer.Elapsed.TotalSeconds,4)) sec" -fore Cyan
     return
@@ -109,13 +105,13 @@ if (!$env:1) { timeout -1; return }
 ## Generate text decoding header - compact self-expanding batch file for bundled ascii encoded cab archive of target files
   $HEADER  = "@echo off &chcp 65001 >nul &pushd `"%~dp0`"`r`n"
   $HEADER += '@set "0=%~f0" &powershell -nop -c $f=[IO.File]::ReadAllText($env:0)-split'':bat2file\:.*'';iex($f[1]); X(1) '
-  $HEADER += "&timeout -1 &exit/b`r`n`r`n:bat2file: Compressed2TXT v6.3`r`n"
+  $HEADER += "&timeout /t 6 &exit/b`r`n`r`n:bat2file: Compressed2TXT v6.4`r`n"
 ## Choice 4: Long lines (less overhead) - each line has 4 extra chars (cr lf ::) and short lines are ~8 times as many
   if ($choices -eq 'longlines') {$line = 1014} else {$line = 126}
 ## Choice 1: Input decoding key as password - or bundle it with the file for automatic extraction
   if ($choices -eq 'password') {
     $HEADER += '$b=''Microsoft.VisualBasic'';Add-Type -As $b;$k=iex "[$b.Interaction]::InputBox(''Key'','+$chars+')";'
-    $HEADER += 'if($k.Length-ne'+$chars+'){exit}Add-Type -Ty @' + "'`r`n"
+    $HEADER += 'if($k.Length-ne'+$chars+'){exit};Add-Type -Ty @' + "'`r`n"
   } else {
     $HEADER += '$k='''+$key+"'; Add-Type -Ty @'`r`n"
   }
@@ -156,9 +152,9 @@ FileStream(fo,FileMode.Create)){for(int i=0;i!=z;i++){c=b91[f[x][i]]; if(c==91)c
   if ($choices -eq 'password') {
     [IO.File]::WriteAllText($outputkey, $key)
     write-host "`ndecoding key saved separately to $fn1~key.ini" -fore Yellow; write-host "$key`n"
-  } else {del $outputkey -force -ea 0|out-null}
+  } else {del $outputkey -force -ea 0 >''}
 ## Done - cleanup $work dir and write timer
-  sl -lit $top; rmdir -lit $work -rec -force -ea 0|out-null; if (Test-Path -lit $work) {$null=cmd /c rmdir /s/q "`"$work`""}
+  push-location -lit $root; if (test-path -lit $work) {start -nonew cmd "/d/x/c rmdir /s/q ""$work""" >''}
   $timer.Stop()
   write-host "`nDone in $([math]::Round($timer.Elapsed.TotalSeconds,4)) sec" -fore Cyan
   timeout -1; return
