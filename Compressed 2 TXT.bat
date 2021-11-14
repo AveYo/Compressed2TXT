@@ -98,7 +98,7 @@ if (!$env:1) { timeout -1; return }
     $output = $dir + "\$fn1~.cab"
     write-host "`nCAB archive only $output ..."
     move -lit "$work\1.cab" -dest $output -force -ea 0
-    push-location -lit $root; if (test-path -lit $work) {start -nonew cmd "/d/x/c rmdir /s/q ""$work""" >''}
+    push-location -lit $root; if (test-path -lit $work) {start -nonew -file cmd -args "/d/x/c rmdir /s/q ""$work"">nul 2>nul"}
     $timer.Stop()
     write-host "`nDone in $([math]::Round($timer.Elapsed.TotalSeconds,4)) sec" -fore Cyan
     return
@@ -154,7 +154,7 @@ FileStream(fo,FileMode.Create)){for(int i=0;i!=z;i++){c=b91[f[x][i]]; if(c==91)c
     write-host "`ndecoding key saved separately to $fn1~key.ini" -fore Yellow; write-host "$key`n"
   } else {del $outputkey -force -ea 0 >''}
 ## Done - cleanup $work dir and write timer
-  push-location -lit $root; if (test-path -lit $work) {start -nonew cmd "/d/x/c rmdir /s/q ""$work""" >''}
+  push-location -lit $root; if (test-path -lit $work) {start -nonew -file cmd -args "/d/x/c rmdir /s/q ""$work"">nul 2>nul"}
   $timer.Stop()
   write-host "`nDone in $([math]::Round($timer.Elapsed.TotalSeconds,4)) sec" -fore Cyan
   timeout -1; return
